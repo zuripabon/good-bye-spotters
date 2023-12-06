@@ -1,7 +1,8 @@
-import Matrix from './Matrix';
-import Mesh from './Mesh';
-import Shader from './Shader';
-import Texture from './Texture';
+import Matrix from './Matrix'
+import Mesh from './Mesh'
+import Shader from './Shader'
+import Texture from './Texture'
+import Camera from './Camera'
 import { on } from './utils'
 
 // A WEBGL program is a combination shader programs which are dynamically controlled with javascript code
@@ -13,6 +14,8 @@ abstract class Engine {
   glContext: WebGLRenderingContext
   protected gameObjects: {[key:string]: Mesh} = {}
   protected inputs: {[key:string]: boolean} = {}
+  protected camera:Camera|null = null
+  protected lastDelta:number = 0.016
 
   private tempMatrix: Matrix
   modelviewMatrix: Matrix
@@ -53,6 +56,15 @@ abstract class Engine {
     }
     this.loadIdentity()
     this.texture.bind(0)
+
+    if(this.camera){ 
+      const cameraPosition = this.camera.getPosition()
+      const cameraRotation = this.camera.getRotation()
+      this.rotate(cameraRotation.x, 1, 0, 0);
+      this.rotate(cameraRotation.y, 0, 1, 0);
+      this.translate(cameraPosition.x, cameraPosition.y, cameraPosition.z);
+    }
+
     this.draw()
   }
 
@@ -62,6 +74,10 @@ abstract class Engine {
 
   createGameObject(name:string, mesh: Mesh){
     this.gameObjects[name] = mesh
+  }
+
+  createCamera(camera:Camera){ 
+    this.camera = camera
   }
 
   drawObject(gameObjectId:string, x:number, y:number, z:number, s:number){
@@ -119,13 +135,19 @@ abstract class Engine {
     this.getMatrix().m = /*hasFloat32Array ?*/ m;
   }
 
+  rotate(a:number, x:number, y:number, z:number) {
+    this.multMatrix(Matrix.rotate(a, x, y, z, this.tempMatrix));
+  }
+
   animate() {
     let time = new Date().getTime();
     
     const loop = () => {
       const now = new Date().getTime();
+      const delta = (now - time) / 1000
+      this.lastDelta = delta
 
-      this.update((now - time) / 1000, this.inputs);
+      this.update(delta, this.inputs);
       this.render();
 
       window.requestAnimationFrame(loop);
@@ -172,6 +194,14 @@ abstract class Engine {
       }
       this.inputs[e.code] = false;
     });
+    this.canvas.addEventListener('mousemove', (e:MouseEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+
+      if(this.camera && this.camera.onMouseMove){
+        this.camera.onMouseMove(e.movementX, e.movementY, this.lastDelta)
+      }
+    })
     on(window, 'resize', resize);
     resize();
   }
