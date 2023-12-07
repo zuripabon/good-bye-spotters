@@ -2,8 +2,8 @@ import Matrix from './Matrix'
 import Mesh from './Mesh'
 import Shader from './Shader'
 import Texture from './Texture'
-import Camera from './Camera'
-import { on } from './utils'
+import GameObject from './GameObject'
+import { on, abab } from './utils'
 
 // A WEBGL program is a combination shader programs which are dynamically controlled with javascript code
 abstract class Engine {
@@ -12,9 +12,10 @@ abstract class Engine {
   private shader: Shader
   private texture: Texture | null = null
   glContext: WebGLRenderingContext
-  protected gameObjects: {[key:string]: Mesh} = {}
   protected inputs: {[key:string]: boolean} = {}
-  protected camera:Camera|null = null
+  private gameObjectCollisions:{[key:string]: boolean} = {}
+  protected gameObjects:{[key:string]: GameObject} = {}
+  protected gameObjectsIds:string[] = []
   protected lastDelta:number = 0.016
 
   private tempMatrix: Matrix
@@ -46,10 +47,6 @@ abstract class Engine {
     this.glContext.blendFunc(770, 771)
   }
 
-  abstract update(delta:number, inputs:{[key:string]: boolean}):void
-
-  abstract draw():void
-
   private render(){
     if(!this.texture){
       return
@@ -57,35 +54,27 @@ abstract class Engine {
     this.loadIdentity()
     this.texture.bind(0)
 
-    if(this.camera){ 
-      const cameraPosition = this.camera.getPosition()
-      const cameraRotation = this.camera.getRotation()
-      this.rotate(cameraRotation.x, 1, 0, 0);
-      this.rotate(cameraRotation.y, 0, 1, 0);
-      this.translate(cameraPosition.x, cameraPosition.y, cameraPosition.z);
+    for(const gameObjectId of this.gameObjectsIds){ 
+      this.gameObjects[gameObjectId].draw(this)
     }
 
-    this.draw()
   }
 
   createTexture(texture: HTMLImageElement){
     this.texture = Texture.fromImage(this.glContext, texture);
   }
 
-  createGameObject(name:string, mesh: Mesh){
-    this.gameObjects[name] = mesh
+  createGameObject(gameObjectId:string, gameObject:GameObject){
+    this.gameObjectsIds.push(gameObjectId)
+    this.gameObjects[gameObjectId] = gameObject
   }
 
-  createCamera(camera:Camera){ 
-    this.camera = camera
-  }
-
-  drawObject(gameObjectId:string, x:number, y:number, z:number, s:number){
+  drawObject(geometry:Mesh, x:number, y:number, z:number, s:number){
       this.pushMatrix();
       this.translate(x, y, z);
       this.scale(s, s, s);
       this.shader.uniforms({ texture: 0,  over: 1.0 });
-      this.shader.draw(this.gameObjects[gameObjectId]);
+      this.shader.draw(geometry);
       this.popMatrix();
   }
 
@@ -146,8 +135,32 @@ abstract class Engine {
       const now = new Date().getTime();
       const delta = (now - time) / 1000
       this.lastDelta = delta
+      
 
-      this.update(delta, this.inputs);
+      for (let i=0; i < this.gameObjectsIds.length; i++) { 
+
+        const gameObjectId = this.gameObjectsIds[i]
+        const gameObject = this.gameObjects[gameObjectId]
+
+        gameObject?.update(delta, this.inputs)
+
+        if(gameObjectId !== 'player' && gameObject.onCollide && gameObject.getCollider) {
+          const playerBorderBox = this.gameObjects['player'].getCollider()
+          const gameObjectBorderBox = gameObject.getCollider()
+          const isColliding = abab(gameObjectBorderBox, playerBorderBox)
+          if(isColliding){
+            if(!this.gameObjectCollisions[gameObjectId]){
+              this.gameObjects['player'].onCollide(gameObjectId)
+              gameObject.onCollide('player')
+              this.gameObjectCollisions[gameObjectId] = true
+            } 
+          }
+          else{
+            this.gameObjectCollisions[gameObjectId] = false
+          }
+        }
+      }
+      
       this.render();
 
       window.requestAnimationFrame(loop);
@@ -179,7 +192,7 @@ abstract class Engine {
       this.perspective(90 /*45*/, this.canvas.width / this.canvas.height,  0.01,  1000);
       this.matrixMode = 'modelView';
       
-      this.draw();
+      this.render();
     }
     document.addEventListener('keydown', (e:KeyboardEvent) => {
       if (e.altKey || e.ctrlKey || e.metaKey) {
@@ -197,10 +210,13 @@ abstract class Engine {
     this.canvas.addEventListener('mousemove', (e:MouseEvent) => {
       e.preventDefault()
       e.stopPropagation()
-
-      if(this.camera && this.camera.onMouseMove){
-        this.camera.onMouseMove(e.movementX, e.movementY, this.lastDelta)
+      for(const gameObjectId of this.gameObjectsIds){ 
+        const gameObject = this.gameObjects[gameObjectId]
+        if(gameObject.onMouseMove){
+          gameObject.onMouseMove(e.movementX, e.movementY, this.lastDelta)
+        }
       }
+
     })
     on(window, 'resize', resize);
     resize();

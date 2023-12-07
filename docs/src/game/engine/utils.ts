@@ -1,5 +1,6 @@
 import Vector from './Vector'
 import Mesh from './Mesh'
+import GameObject from './GameObject';
 
 export const on = (element: Window | Document | HTMLElement, name:string, callback: () =>void) => {
     element.addEventListener(name, callback);
@@ -66,6 +67,13 @@ export const clamp = function(a:number,b:number,c:number){
 // aabb vs aabb
 // we assume a and b have two vectors mn (min) and mx (max) which determine their bounding box
 // you need to call update on them (usp) so the min and max are calculated based on their (p)osition +- (d)imensions
-export const abab = function(a:Sprite, b:Sprite){
-    return (a.mn.x <= b.mx.x && a.mx.x >= b.mn.x && a.mn.y <= b.mx.y && a.mx.y >= b.mn.y && a.mx.z <= b.mx.z && a.mx.z >= b.mn.z);
+export const abab = function(a: [Vector, Vector], b: [Vector, Vector]){
+    return (
+        a[0].x <= b[1].x && 
+        a[1].x >= b[0].x && 
+        a[0].y <= b[1].y && 
+        a[1].y >= b[0].y && 
+        a[1].z <= b[1].z && 
+        a[1].z >= b[0].z
+    );
 };
