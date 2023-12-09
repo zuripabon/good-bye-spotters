@@ -52,7 +52,6 @@ abstract class Engine {
       return
     }
     this.loadIdentity()
-    this.texture.bind(0)
 
     for(const gameObjectId of this.gameObjectsIds){ 
       this.gameObjects[gameObjectId].draw(this)
