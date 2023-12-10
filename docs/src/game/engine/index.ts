@@ -24,7 +24,7 @@ abstract class Engine {
   private resultMatrix: Matrix
   private stack:Float32Array[] = []
   private matrixMode:string = ''
-  private fps:number = 30
+  protected fps:number = 30
 
   constructor(vertexShader: string, fragmentShader: string){
     this.canvas = document.createElement('canvas')
@@ -53,6 +53,9 @@ abstract class Engine {
       return
     }
     this.loadIdentity()
+
+    // this.glContext.clearColor()
+    this.glContext.clear(0)
 
     for(const gameObjectId of this.gameObjectsIds){ 
       this.gameObjects[gameObjectId].draw(this)
@@ -129,31 +132,23 @@ abstract class Engine {
   }
 
   animate() {
+    let time = window.performance.now()
+    // let frameCount = 0
+
     const fpsInterval = 1000 / this.fps;
-    // let then = window.performance.now()
-    // const startTime = then
-    let time = new Date().getTime();
-    const startTime = time
-    let frameCount = 0
+    // const startTime = time
 
-    const loop = () => {
+    const loop = (newtime: number) => {
 
-      const now = new Date().getTime();
+      const now = newtime;
       const elapsed = now-time
-      
-
-  
-      // requestAnimationFrame(loop);
-  
-      // const now = newtime
-      // then = now - then
       
       if (elapsed > fpsInterval) {
           const delta = elapsed / 1000
           this.lastDelta = delta
         
-          const currentFps = Math.round(1000 / ((now - startTime) / ++frameCount) * 100) / 100;
-          console.log({currentFps})
+          // const currentFps = Math.round(1000 / ((now - startTime) / ++frameCount) * 100) / 100;
+          // console.log({currentFps})
   
           
           for (let i=0; i < this.gameObjectsIds.length; i++) { 
@@ -190,44 +185,7 @@ abstract class Engine {
         window.requestAnimationFrame(loop);
     }
 
-    // const loop = () => {
-
-    //   const now = new Date().getTime();
-    //   const delta = (now - time) / 1000
-    //   this.lastDelta = delta
-      
-
-    //   for (let i=0; i < this.gameObjectsIds.length; i++) { 
-
-    //     const gameObjectId = this.gameObjectsIds[i]
-    //     const gameObject = this.gameObjects[gameObjectId]
-
-    //     gameObject?.update(delta, this.inputs)
-
-    //     if(gameObjectId !== 'player' && gameObject.onCollide && gameObject.getCollider) {
-    //       const playerBorderBox = this.gameObjects['player'].getCollider()
-    //       const gameObjectBorderBox = gameObject.getCollider()
-    //       const isColliding = abab(gameObjectBorderBox, playerBorderBox)
-    //       if(isColliding){
-    //         if(!this.gameObjectCollisions[gameObjectId]){
-    //           this.gameObjects['player'].onCollide(gameObjectId)
-    //           gameObject.onCollide('player')
-    //           this.gameObjectCollisions[gameObjectId] = true
-    //         } 
-    //       }
-    //       else{
-    //         this.gameObjectCollisions[gameObjectId] = false
-    //       }
-    //     }
-    //   }
-      
-    //   this.render();
-
-    //   window.requestAnimationFrame(loop);
-    //   time = now;
-    // }
-
-    loop();
+    loop(time);
   }
 
   fullscreen() {

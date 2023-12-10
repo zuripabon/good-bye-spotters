@@ -27,6 +27,8 @@ class Game extends Engine {
         game.initWorld(texture)
         game.fullscreen()
         game.animate()
+
+        console.log(`Running at fixed ${game.fps} FPS`)
     }
 }
 
