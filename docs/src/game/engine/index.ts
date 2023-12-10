@@ -24,6 +24,7 @@ abstract class Engine {
   private resultMatrix: Matrix
   private stack:Float32Array[] = []
   private matrixMode:string = ''
+  private fps:number = 30
 
   constructor(vertexShader: string, fragmentShader: string){
     this.canvas = document.createElement('canvas')
@@ -128,43 +129,103 @@ abstract class Engine {
   }
 
   animate() {
+    const fpsInterval = 1000 / this.fps;
+    // let then = window.performance.now()
+    // const startTime = then
     let time = new Date().getTime();
-    
+    const startTime = time
+    let frameCount = 0
+
     const loop = () => {
+
       const now = new Date().getTime();
-      const delta = (now - time) / 1000
-      this.lastDelta = delta
+      const elapsed = now-time
       
 
-      for (let i=0; i < this.gameObjectsIds.length; i++) { 
+  
+      // requestAnimationFrame(loop);
+  
+      // const now = newtime
+      // then = now - then
+      
+      if (elapsed > fpsInterval) {
+          const delta = elapsed / 1000
+          this.lastDelta = delta
+        
+          const currentFps = Math.round(1000 / ((now - startTime) / ++frameCount) * 100) / 100;
+          console.log({currentFps})
+  
+          
+          for (let i=0; i < this.gameObjectsIds.length; i++) { 
 
-        const gameObjectId = this.gameObjectsIds[i]
-        const gameObject = this.gameObjects[gameObjectId]
+            const gameObjectId = this.gameObjectsIds[i]
+            const gameObject = this.gameObjects[gameObjectId]
 
-        gameObject?.update(delta, this.inputs)
+            gameObject?.update(delta, this.inputs)
 
-        if(gameObjectId !== 'player' && gameObject.onCollide && gameObject.getCollider) {
-          const playerBorderBox = this.gameObjects['player'].getCollider()
-          const gameObjectBorderBox = gameObject.getCollider()
-          const isColliding = abab(gameObjectBorderBox, playerBorderBox)
-          if(isColliding){
-            if(!this.gameObjectCollisions[gameObjectId]){
-              this.gameObjects['player'].onCollide(gameObjectId)
-              gameObject.onCollide('player')
-              this.gameObjectCollisions[gameObjectId] = true
-            } 
+            if(gameObjectId !== 'player' && gameObject.onCollide && gameObject.getCollider) {
+              const playerBorderBox = this.gameObjects['player'].getCollider()
+              const gameObjectBorderBox = gameObject.getCollider()
+              const isColliding = abab(gameObjectBorderBox, playerBorderBox)
+              if(isColliding){
+                if(!this.gameObjectCollisions[gameObjectId]){
+                  this.gameObjects['player'].onCollide(gameObjectId)
+                  gameObject.onCollide('player')
+                  this.gameObjectCollisions[gameObjectId] = true
+                } 
+              }
+              else{
+                this.gameObjectCollisions[gameObjectId] = false
+              }
+            }
           }
-          else{
-            this.gameObjectCollisions[gameObjectId] = false
-          }
+          
+          this.render()
+
+          // Get ready for next frame by setting then=now, but...
+          // Also, adjust for fpsInterval not being multiple of 16.67
+          time = now - (elapsed % fpsInterval)
         }
-      }
-      
-      this.render();
 
-      window.requestAnimationFrame(loop);
-      time = now;
+        window.requestAnimationFrame(loop);
     }
+
+    // const loop = () => {
+
+    //   const now = new Date().getTime();
+    //   const delta = (now - time) / 1000
+    //   this.lastDelta = delta
+      
+
+    //   for (let i=0; i < this.gameObjectsIds.length; i++) { 
+
+    //     const gameObjectId = this.gameObjectsIds[i]
+    //     const gameObject = this.gameObjects[gameObjectId]
+
+    //     gameObject?.update(delta, this.inputs)
+
+    //     if(gameObjectId !== 'player' && gameObject.onCollide && gameObject.getCollider) {
+    //       const playerBorderBox = this.gameObjects['player'].getCollider()
+    //       const gameObjectBorderBox = gameObject.getCollider()
+    //       const isColliding = abab(gameObjectBorderBox, playerBorderBox)
+    //       if(isColliding){
+    //         if(!this.gameObjectCollisions[gameObjectId]){
+    //           this.gameObjects['player'].onCollide(gameObjectId)
+    //           gameObject.onCollide('player')
+    //           this.gameObjectCollisions[gameObjectId] = true
+    //         } 
+    //       }
+    //       else{
+    //         this.gameObjectCollisions[gameObjectId] = false
+    //       }
+    //     }
+    //   }
+      
+    //   this.render();
+
+    //   window.requestAnimationFrame(loop);
+    //   time = now;
+    // }
 
     loop();
   }
