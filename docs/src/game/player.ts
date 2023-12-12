@@ -66,8 +66,12 @@ class Player implements GameObject {
         return [minBorderBox, maxBorderBox]
     }
 
-    onCollide(gameObjectId: string): void {
+    onCollideEnter(gameObjectId: string): void {
         console.log(`player says: colliding ${gameObjectId}`)
+    }
+
+    onCollideLeave(gameObjectId: string): void {
+        console.log(`player says: leaving colliding ${gameObjectId}`)
     }
 }
 

@@ -54,8 +54,8 @@ abstract class Engine {
     }
     this.loadIdentity()
 
-    // this.glContext.clearColor()
-    this.glContext.clear(0)
+    this.glContext.clearColor(0.0, 0.0, 0.0, 1.0)
+    this.glContext.clear(this.glContext.COLOR_BUFFER_BIT)
 
     for(const gameObjectId of this.gameObjectsIds){ 
       this.gameObjects[gameObjectId].draw(this)
@@ -130,6 +130,32 @@ abstract class Engine {
   rotate(a:number, x:number, y:number, z:number) {
     this.multMatrix(Matrix.rotate(a, x, y, z, this.tempMatrix));
   }
+  
+  checkCollisions(gameObjectId:string, gameObject:GameObject){
+    
+    if(gameObjectId !== 'player' && gameObject.onCollideEnter && gameObject.getCollider) {
+      
+      const playerBorderBox = this.gameObjects['player'].getCollider()
+      const gameObjectBorderBox = gameObject.getCollider()
+      const isColliding = abab(gameObjectBorderBox, playerBorderBox)
+      
+      if(isColliding){
+        if(!this.gameObjectCollisions[gameObjectId]){
+          this.gameObjects['player'].onCollideEnter(gameObjectId)
+          gameObject.onCollideEnter('player')
+          this.gameObjectCollisions[gameObjectId] = true
+        } 
+      }
+      else {
+        if(gameObject.onCollideLeave && this.gameObjectCollisions[gameObjectId]){
+          this.gameObjects['player'].onCollideLeave(gameObjectId)
+          gameObject.onCollideLeave('player')
+        }
+
+        this.gameObjectCollisions[gameObjectId] = false
+      }
+    }
+  }
 
   animate() {
     let time = window.performance.now()
@@ -149,7 +175,6 @@ abstract class Engine {
         
           // const currentFps = Math.round(1000 / ((now - startTime) / ++frameCount) * 100) / 100;
           // console.log({currentFps})
-  
           
           for (let i=0; i < this.gameObjectsIds.length; i++) { 
 
@@ -158,21 +183,7 @@ abstract class Engine {
 
             gameObject?.update(delta, this.inputs)
 
-            if(gameObjectId !== 'player' && gameObject.onCollide && gameObject.getCollider) {
-              const playerBorderBox = this.gameObjects['player'].getCollider()
-              const gameObjectBorderBox = gameObject.getCollider()
-              const isColliding = abab(gameObjectBorderBox, playerBorderBox)
-              if(isColliding){
-                if(!this.gameObjectCollisions[gameObjectId]){
-                  this.gameObjects['player'].onCollide(gameObjectId)
-                  gameObject.onCollide('player')
-                  this.gameObjectCollisions[gameObjectId] = true
-                } 
-              }
-              else{
-                this.gameObjectCollisions[gameObjectId] = false
-              }
-            }
+            this.checkCollisions(gameObjectId, gameObject)
           }
           
           this.render()

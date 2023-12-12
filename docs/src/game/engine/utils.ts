@@ -41,11 +41,14 @@ export const mo = function(mesh:Mesh, t:number, px:number, py:number, pz:number,
 
 export const text = function(what:string){
     const dialogElement = document.getElementById("upper");
-    if(!dialogElement || what === ""){
-        return;
+    if(!dialogElement){
+        return
     }
     dialogElement.style.display = 'none';
-    dialogElement.innerHTML = what; //sprites working. silly physics too."; // "lol this is working";
+    if(what === ""){
+        return
+    }
+    dialogElement.innerHTML = what;
     dialogElement.style.display = 'block';
 };
 
