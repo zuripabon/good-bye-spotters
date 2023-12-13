@@ -2,7 +2,7 @@ import Vector from "./engine/Vector"
 import Mesh from "./engine/Mesh"
 import Engine from "./engine"
 import GameObject from "./engine/GameObject"
-import RandomDialog from "./engine/RandomDialog"
+import ConversationDialog from "./engine/ConversationDialog"
 import { priestDialog } from "./dialogs"
 
 class Priest implements GameObject {
@@ -11,14 +11,27 @@ class Priest implements GameObject {
     private dimension:Vector = new Vector(0.015, 0.30,  0.05)
     private scale: number = 1.0
     private geometry: Mesh
-    private dialog:RandomDialog
+    private dialog:ConversationDialog
 
     constructor(glEngine: Engine){
         this.geometry = Mesh.plane(glEngine.glContext, 512, 0, 640, 254, 0.13, 0.30)
-        this.dialog = new RandomDialog(priestDialog.map(({dialog}) => dialog))
+        this.dialog = new ConversationDialog(priestDialog)
     }
 
-    update(){}
+    update(_: number, inputs: {[key:string]: boolean} = {}){
+        if(inputs.Space){
+            this.dialog.next()
+            if(this.dialog.isDialogOver()){
+                console.log('go next scene')
+            }
+        }
+        if(inputs.KeyY){
+            this.dialog.yes()
+        }
+        if(inputs.KeyN){
+            this.dialog.no()
+        }
+    }
 
     draw(glEngine: Engine):void { 
         glEngine.drawObject(
@@ -37,11 +50,11 @@ class Priest implements GameObject {
     }
 
     onCollideEnter(): void {
-        this.dialog.show()
+        this.dialog.start()
     }
 
     onCollideLeave(): void {
-        this.dialog.hide()
+        this.dialog.end()
     }
 }
 
