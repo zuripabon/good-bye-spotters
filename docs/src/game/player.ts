@@ -1,15 +1,26 @@
 import Vector from "./engine/Vector"
-import Engine from "./engine"
-import GameObject from "./engine/GameObject"
 import { clamp } from './engine/utils'
+import Camera from "./engine/Camera"
 
-class Player implements GameObject {
+class Player extends Camera {
 
-    private dimension:Vector = new Vector(0.25,  0.25,  0.25)
-    private rotation: Vector = new Vector(0, 0, 0)
-    private position: Vector = new Vector(0.0, -0.45, -1.0)
+    private canMove:boolean = true;
+
+    constructor(){
+
+        super(
+            new Vector(0.0, -0.45, -1.0),
+            new Vector(0, 0, 0),
+            new Vector(0.25,  0.25,  0.25)
+        )
+    }
 
     update(delta: number, inputs: {[key:string]: boolean} = {}){
+        
+        if(!this.canMove){
+            return
+        }
+
         let speed = 0.0
         let side = 0.0
         let strife = 0.0
@@ -45,12 +56,6 @@ class Player implements GameObject {
         this.position.z -= Math.cos(stepRot) * speed;
     }
 
-    draw(glEngine: Engine):void { 
-        glEngine.rotate(this.rotation.x, 1, 0, 0);
-        glEngine.rotate(this.rotation.y, 0, 1, 0);
-        glEngine.translate(this.position.x, this.position.y, this.position.z);
-    }
-
     onMouseMove(x:number, y:number, lastDelta: number){
         this.rotation.x += y * lastDelta * 4.0;
         this.rotation.x = clamp(this.rotation.x, -90, 90); // unless you wanna break your neck ;)
@@ -58,20 +63,16 @@ class Player implements GameObject {
         this.rotation.y += x * lastDelta * 4.0;
     }
 
-    getCollider():[Vector, Vector] {
-        // it's negative because the camera gets translated by the positive axis
-        const position = new Vector(-this.position.x, -this.position.y, -this.position.z)
-        const minBorderBox = position.subtract(this.dimension);
-        const maxBorderBox = position.add(this.dimension); 
-        return [minBorderBox, maxBorderBox]
+    onSceneEnter(sceneId: string): void {
+        if(sceneId === 'world'){
+            this.canMove = true
+        }
     }
 
-    onCollideEnter(gameObjectId: string): void {
-        console.log(`player says: colliding ${gameObjectId}`)
-    }
-
-    onCollideLeave(gameObjectId: string): void {
-        console.log(`player says: leaving colliding ${gameObjectId}`)
+    onCollideEnter(gameObjectId: string, sceneId: string): void {
+        if(sceneId === 'lobby' && gameObjectId === 'priest'){
+            this.canMove = false
+        }
     }
 }
 

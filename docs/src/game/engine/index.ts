@@ -3,30 +3,34 @@ import Mesh from './Mesh'
 import Shader from './Shader'
 import Texture from './Texture'
 import GameObject from './GameObject'
+import Camera from './Camera'
 import { on, abab } from './utils'
 
 // A WEBGL program is a combination shader programs which are dynamically controlled with javascript code
 abstract class Engine {
 
+  glContext: WebGLRenderingContext
+  modelviewMatrix: Matrix
+  projectionMatrix: Matrix
+  
+  protected inputs: {[key:string]: boolean} = {}
+  protected gameCamera: GameObject = new Camera()
+  protected gameState: {[key:string]: number|string|boolean} = {}
+  protected lastDelta:number = 0.016
+  protected currentScene:string = 'default'
+  protected gameScenes:{[key:string]: GameObject[]} = {}
+  protected fps:number = 30
+  
   private canvas: HTMLCanvasElement
   private shader: Shader
   private texture: Texture | null = null
-  glContext: WebGLRenderingContext
-  protected inputs: {[key:string]: boolean} = {}
   private gameObjectCollisions:{[key:string]: boolean} = {}
-  protected gameObjects:{[key:string]: GameObject} = {}
-  protected gameObjectsIds:string[] = []
-  protected lastDelta:number = 0.016
-
   private tempMatrix: Matrix
-  modelviewMatrix: Matrix
-  projectionMatrix: Matrix
   private resultMatrix: Matrix
   private stack:Float32Array[] = []
   private matrixMode:string = ''
-  protected fps:number = 30
 
-  constructor(vertexShader: string, fragmentShader: string){
+  constructor(vertexShader: string, fragmentShader: string, texture: HTMLImageElement){
     this.canvas = document.createElement('canvas')
 
     const glContext = this.canvas.getContext('webgl', {alpha: false})
@@ -46,30 +50,50 @@ abstract class Engine {
     this.glContext.enable(this.glContext.DEPTH_TEST);
     this.glContext.enable(this.glContext.BLEND) //  - warning: in order to have true alpha you need to discard values on the shader (otherwise you get some not fully transparent ghosts)
     this.glContext.blendFunc(770, 771)
-  }
-
-  private render(){
-    if(!this.texture){
-      return
-    }
-    this.loadIdentity()
-
-    this.glContext.clearColor(0.0, 0.0, 0.0, 1.0)
-    this.glContext.clear(this.glContext.COLOR_BUFFER_BIT)
-
-    for(const gameObjectId of this.gameObjectsIds){ 
-      this.gameObjects[gameObjectId].draw(this)
-    }
-
-  }
-
-  createTexture(texture: HTMLImageElement){
     this.texture = Texture.fromImage(this.glContext, texture);
   }
 
-  createGameObject(gameObjectId:string, gameObject:GameObject){
-    this.gameObjectsIds.push(gameObjectId)
-    this.gameObjects[gameObjectId] = gameObject
+  createPlayer(camera: GameObject, state: {[key:string]: number|string|boolean} ){
+    this.gameCamera = camera
+    this.gameState = state
+  }  
+
+  createGameObject(gameObject:GameObject, sceneId?: string){
+    const useScene = sceneId || this.currentScene
+
+    if(this.gameScenes[useScene]){
+      this.gameScenes[useScene].push(gameObject)
+      return;
+    }
+    this.gameScenes[useScene] = [gameObject]
+  }
+
+  setScene(sceneId:string){
+    if(this.gameScenes[sceneId]) {
+      if(this.gameCamera.onSceneLeave){
+        this.gameCamera.onSceneLeave(this.currentScene)
+      }
+      if(this.gameScenes[this.currentScene]){
+        for (let i=0; i < this.gameScenes[this.currentScene].length; i++) { 
+          const currentGameObject = this.gameScenes[this.currentScene][i]
+          if(currentGameObject.onSceneLeave){
+            currentGameObject.onSceneLeave(this.currentScene)
+          }
+        }
+      }
+
+      this.currentScene = sceneId
+
+      if(this.gameCamera.onSceneEnter){
+        this.gameCamera.onSceneEnter(this.currentScene)
+      }
+      for (let i=0; i < this.gameScenes[this.currentScene].length; i++) { 
+        const currentGameObject = this.gameScenes[this.currentScene][i]
+        if(currentGameObject.onSceneEnter){
+          currentGameObject.onSceneEnter(this.currentScene)
+        }
+      }
+    }
   }
 
   drawObject(geometry:Mesh, x:number, y:number, z:number, s:number){
@@ -81,14 +105,7 @@ abstract class Engine {
       this.popMatrix();
   }
 
-  private getMatrix():Matrix {
-    if(this.matrixMode === 'modelView'){
-      return this.modelviewMatrix
-    }
-
-    return this.projectionMatrix
-  }
-
+  
   loadIdentity() {
     Matrix.identity(this.getMatrix());
   }
@@ -132,29 +149,66 @@ abstract class Engine {
   }
   
   checkCollisions(gameObjectId:string, gameObject:GameObject){
-    
-    if(gameObjectId !== 'player' && gameObject.onCollideEnter && gameObject.getCollider) {
-      
-      const playerBorderBox = this.gameObjects['player'].getCollider()
-      const gameObjectBorderBox = gameObject.getCollider()
-      const isColliding = abab(gameObjectBorderBox, playerBorderBox)
-      
-      if(isColliding){
-        if(!this.gameObjectCollisions[gameObjectId]){
-          this.gameObjects['player'].onCollideEnter(gameObjectId)
-          gameObject.onCollideEnter('player')
-          this.gameObjectCollisions[gameObjectId] = true
-        } 
-      }
-      else {
-        if(gameObject.onCollideLeave && this.gameObjectCollisions[gameObjectId]){
-          this.gameObjects['player'].onCollideLeave(gameObjectId)
-          gameObject.onCollideLeave('player')
-        }
 
-        this.gameObjectCollisions[gameObjectId] = false
-      }
+    if(!gameObject.getCollider){
+      return
     }
+
+    // Camera collision
+    this.checkCollision(gameObjectId, gameObject, 'camera', this.gameCamera)
+
+    // Rest objects collision
+    for (let i=0; i < this.gameScenes[this.currentScene].length; i++) { 
+
+      const currentGameObject = this.gameScenes[this.currentScene][i]
+      const currentGameObjectId = currentGameObject.getId()
+
+      if(currentGameObjectId !== gameObjectId){
+        this.checkCollision(gameObjectId, gameObject, currentGameObjectId, currentGameObject)
+      }
+
+    }
+  }  
+  
+  private checkCollision(
+    gameObjectAId:string, 
+    gameObjectA:GameObject, 
+    gameObjectBId:string, 
+    gameObjectB:GameObject
+  ){
+    
+    if(!gameObjectA.getCollider || !gameObjectB.getCollider) {
+      return
+    }
+      
+    const gameObjectABorderBox = gameObjectA.getCollider()
+    const gameObjectBBorderBox = gameObjectB.getCollider()
+    const isColliding = abab(gameObjectABorderBox, gameObjectBBorderBox)
+    
+    if(isColliding){
+      if(!this.gameObjectCollisions[gameObjectAId] && gameObjectA.onCollideEnter){
+        gameObjectA.onCollideEnter(gameObjectBId, this.currentScene)
+        this.gameObjectCollisions[gameObjectAId] = true
+      } 
+
+      if(!this.gameObjectCollisions[gameObjectBId] && gameObjectB.onCollideEnter){
+        gameObjectB.onCollideEnter(gameObjectAId, this.currentScene)
+        this.gameObjectCollisions[gameObjectBId] = true
+      }
+
+      return;
+    }
+
+    if(this.gameObjectCollisions[gameObjectAId] && gameObjectA.onCollideLeave){
+      gameObjectA.onCollideLeave(gameObjectBId, this.currentScene)
+      this.gameObjectCollisions[gameObjectAId] = false
+    }
+    
+    if(this.gameObjectCollisions[gameObjectBId] && gameObjectB.onCollideLeave){
+      gameObjectB.onCollideLeave(gameObjectAId, this.currentScene)
+      this.gameObjectCollisions[gameObjectBId] = false
+    }
+    
   }
 
   animate() {
@@ -175,11 +229,13 @@ abstract class Engine {
         
           // const currentFps = Math.round(1000 / ((now - startTime) / ++frameCount) * 100) / 100;
           // console.log({currentFps})
-          
-          for (let i=0; i < this.gameObjectsIds.length; i++) { 
 
-            const gameObjectId = this.gameObjectsIds[i]
-            const gameObject = this.gameObjects[gameObjectId]
+          this.gameCamera?.update(delta, this.inputs)
+          
+          for (let i=0; i < this.gameScenes[this.currentScene].length; i++) { 
+
+            const gameObject = this.gameScenes[this.currentScene][i]
+            const gameObjectId = gameObject.getId()
 
             gameObject?.update(delta, this.inputs)
 
@@ -239,8 +295,15 @@ abstract class Engine {
     this.canvas.addEventListener('mousemove', (e:MouseEvent) => {
       e.preventDefault()
       e.stopPropagation()
-      for(const gameObjectId of this.gameObjectsIds){ 
-        const gameObject = this.gameObjects[gameObjectId]
+
+      if(this.gameCamera.onMouseMove){
+        this.gameCamera?.onMouseMove(e.movementX, e.movementY, this.lastDelta)
+      }
+
+      for (let i=0; i < this.gameScenes[this.currentScene].length; i++) { 
+
+        const gameObject = this.gameScenes[this.currentScene][i]
+
         if(gameObject.onMouseMove){
           gameObject.onMouseMove(e.movementX, e.movementY, this.lastDelta)
         }
@@ -249,6 +312,32 @@ abstract class Engine {
     })
     on(window, 'resize', resize);
     resize();
+  }
+
+  private render(){
+    if(!this.texture){
+      return
+    }
+    this.loadIdentity()
+
+    this.glContext.clearColor(0.0, 0.0, 0.0, 1.0)
+    this.glContext.clear(this.glContext.COLOR_BUFFER_BIT)
+
+    this.gameCamera?.draw(this)
+
+    for (let i=0; i < this.gameScenes[this.currentScene].length; i++) { 
+      const gameObject = this.gameScenes[this.currentScene][i]
+      gameObject.draw(this)
+    }
+
+  }
+
+  private getMatrix():Matrix {
+    if(this.matrixMode === 'modelView'){
+      return this.modelviewMatrix
+    }
+
+    return this.projectionMatrix
   }
 }
 
