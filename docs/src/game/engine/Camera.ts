@@ -35,9 +35,9 @@ class Camera implements GameObject {
     }
 
     draw(glEngine: Engine):void {
-        glEngine.rotate(this.rotation.x, 1, 0, 0);
-        glEngine.rotate(this.rotation.y, 0, 1, 0);
-        glEngine.translate(this.position.x, this.position.y, this.position.z);
+        glEngine.modelView.rotate(this.rotation.x, 1, 0, 0);
+        glEngine.modelView.rotate(this.rotation.y, 0, 1, 0);
+        glEngine.modelView.translate(this.position.x, this.position.y, this.position.z);
     }
 
     getCollider():[Vector, Vector] {

@@ -24,6 +24,10 @@ class Tree implements GameObject {
         this.position = new Vector(x, y, z)
     }
 
+    setScale(scale: number){
+        this.scale = scale
+    }
+
     getPosition(): Vector {
         return this.position
     }

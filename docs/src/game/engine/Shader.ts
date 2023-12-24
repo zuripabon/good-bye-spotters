@@ -3,6 +3,7 @@ import Matrix from './Matrix'
 import Mesh from './Mesh';
 import Buffer from './Buffer';
 import Engine from '.';
+import ModelView from './ModelView';
 
 // src/shader.js
 // Provides a convenient wrapper for WebGL shaders. A few uniforms and attributes,
@@ -140,14 +141,12 @@ class Shader {
     private attributes: { [key: string]: number } = {};
     private isSampler: { [key: string]: number } = {}
     private usedMatrices: { [key: string]: string } = {}
-    private modelviewMatrix:Matrix
-    private projectionMatrix: Matrix
+    private modelView: ModelView
 
 
-    constructor(context: Engine, vertexSource: string, fragmentSource:string){
-        this.context = context.glContext
-        this.modelviewMatrix = context.modelviewMatrix
-        this.projectionMatrix = context.projectionMatrix
+    constructor(engine: Engine, vertexSource: string, fragmentSource:string){
+        this.context = engine.glContext
+        this.modelView = engine.modelView
         vertexSource = followScriptTagById(vertexSource);
         fragmentSource = followScriptTagById(fragmentSource);
 
@@ -319,8 +318,8 @@ class Shader {
         // Only construct up the built-in matrices we need for this shader.
         // BRING THEM BACK IF WE NEED THEM !!!!
         const used = this.usedMatrices;
-        const MVM = this.modelviewMatrix;
-        const PM = this.projectionMatrix;
+        const MVM = this.modelView.getModelviewMatrix();
+        const PM = this.modelView.getProjectionMatrix();
 //        var MVMI = (used.MVMI || used.NM) ? MVM.inverse() : null;
 //        var PMI = (used.PMI) ? PM.inverse() : null;
 //        var MVPM = (used.MVPM || used.MVPMI) ? PM.multiply(MVM) : null; // original

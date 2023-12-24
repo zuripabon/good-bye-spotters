@@ -25,7 +25,7 @@ class Game extends Engine {
         this.setLobbyScene()
         this.setWorldScene()
 
-        this.setScene('world')
+        this.setScene('lobby')
     } 
     
     setLobbyScene(){
@@ -38,33 +38,35 @@ class Game extends Engine {
         this.createGameObject(new Ground(this), 'world')
         // this.createGameObject(new Moon(this), 'world')
         // this.createGameObject(new Castle(this), 'world')
-        const treeA = new Tree(this)
-        treeA.setPosition(0, 0.3, 0)
-        this.createGameObject(treeA, 'world')
+        // const treeA = new Tree(this)
+        // treeA.setPosition(0.1, 0, 0)
+        // this.createGameObject(treeA, 'world')
+        
         // const treeB = new Tree(this)
-        // treeB.setPosition(-0.5, 0.2, -2)
+        // treeB.setPosition(0.4, 0, 0.5)
+        // // treeB.setScale(10)
         // this.createGameObject(treeB, 'world')
 
-        // for(let i = 0; i < 50; i++) {
+        for(let i = 0; i < 50; i++) {
             
-        //     const treeA = new Tree(this)
-        //     treeA.setPosition(-0.5, 0.2, -(i * 0.3))
+            const treeA = new Tree(this)
+            treeA.setPosition(rn(-3.0, -0.5), 0.6, -(i * 0.3))
 
-        //     // const treeB = new Tree(this)
-        //     // treeB.setPosition(rn(0.5, 3.0), 0.2, -(i * 0.3))
+            const treeB = new Tree(this)
+            treeB.setPosition(rn(0.5, 3.0), 0.6, -(i * 0.3))
             
-        //     // const treeBushA = new TreeBush(this)
-        //     // treeBushA.setPosition(rn(-3.0, -0.25), 0.1, 2.0 -(i * 0.3))
+            const treeBushA = new TreeBush(this)
+            treeBushA.setPosition(rn(-3.0, -0.25), 0.1, 2.0 -(i * 0.3))
             
-        //     // const treeBushB = new TreeBush(this)
-        //     // treeBushB.setPosition(rn(0.25, 3.0),   0.1, 2.0 -(i * 0.3))
+            const treeBushB = new TreeBush(this)
+            treeBushB.setPosition(rn(0.25, 3.0),   0.1, 2.0 -(i * 0.3))
 
             
-        //     this.createGameObject(treeA, 'world')
-        //     // this.createGameObject(treeB, 'world')
-        //     // this.createGameObject(treeBushA, 'world')
-        //     // this.createGameObject(treeBushB, 'world')
-        // }
+            this.createGameObject(treeA, 'world')
+            this.createGameObject(treeB, 'world')
+            this.createGameObject(treeBushA, 'world')
+            this.createGameObject(treeBushB, 'world')
+        }
 
     //     var j = 0;
     //     for(i = u.length-1; i >=0 ; i--)
