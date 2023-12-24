@@ -3,7 +3,7 @@ import { useState, useRef } from 'react'
 import Landing from './components/Landing'
 import Dialog from './components/Dialog'
 import Footer from './components/Footer'
-import initGame from './game';
+import Game from './game'
 import texture from './assets/texture.png'
 
 import './App.css'
@@ -18,7 +18,7 @@ function App() {
   }
 
   const handleOnClick = () => {
-    initGame(imageRef.current as unknown as HTMLImageElement);
+    Game.run(imageRef.current as unknown as HTMLImageElement);
   }
 
   return (

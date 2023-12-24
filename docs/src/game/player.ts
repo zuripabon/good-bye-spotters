@@ -72,7 +72,7 @@ class Player extends Camera {
 
     onSceneEnter(sceneId: string): void {
         if(sceneId === 'world'){
-            this.engine.setShadersUniforms(1.0, [0.26, 0.26])
+            this.engine.setShadersUniforms(1.0, [0.2, 0.1])
             this.position.x = 0.0
             this.position.y = -0.45
             this.position.z = -1.0

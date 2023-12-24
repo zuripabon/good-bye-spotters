@@ -66,7 +66,6 @@ class ModelView {
   rotate(a:number, x:number, y:number, z:number) {
     this.multMatrix(Matrix.rotate(a, x, y, z, this.tempMatrix));
   }
-  
 
   private get matrix():Matrix {
     if(this.matrixMode === 'modelView'){
