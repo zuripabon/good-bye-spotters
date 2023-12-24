@@ -5,7 +5,6 @@ import Church from './nature/church'
 import Priest from './npcs/priest'
 import Ground from './nature/ground'
 import Moon from './nature/moon'
-import Castle from './nature/castle'
 import Tree from './nature/tree'
 import TreeBush from './nature/treeBush'
 import { rn } from './engine/utils'
@@ -25,7 +24,7 @@ class Game extends Engine {
         this.setLobbyScene()
         this.setWorldScene()
 
-        this.setScene('lobby')
+        this.setScene('world')
     } 
     
     setLobbyScene(){
@@ -34,20 +33,11 @@ class Game extends Engine {
     } 
     
     setWorldScene(){
-        // this.createGameObject(new Skybox(this), 'world')
+        this.createGameObject(new Skybox(this), 'world')
         this.createGameObject(new Ground(this), 'world')
-        // this.createGameObject(new Moon(this), 'world')
-        // this.createGameObject(new Castle(this), 'world')
-        // const treeA = new Tree(this)
-        // treeA.setPosition(0.1, 0, 0)
-        // this.createGameObject(treeA, 'world')
-        
-        // const treeB = new Tree(this)
-        // treeB.setPosition(0.4, 0, 0.5)
-        // // treeB.setScale(10)
-        // this.createGameObject(treeB, 'world')
+        this.createGameObject(new Moon(this), 'world')
 
-        for(let i = 0; i < 50; i++) {
+        for(let i = 0; i < 30; i++) {
             
             const treeA = new Tree(this)
             treeA.setPosition(rn(-3.0, -0.5), 0.6, -(i * 0.3))

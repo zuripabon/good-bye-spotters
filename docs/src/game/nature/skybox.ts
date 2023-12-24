@@ -7,7 +7,7 @@ class Skybox implements GameObject {
 
     private id:string 
     private position: Vector = new Vector(0, -3.4, 0)
-    private scale: number = 5.1
+    private scale: number = 5
     private geometry: Mesh
     private engine: Engine
 
