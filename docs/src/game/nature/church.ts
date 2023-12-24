@@ -19,6 +19,10 @@ class Church implements GameObject {
         return this.id
     }
 
+    getPosition(): Vector {
+        return this.position
+    }
+
     update(){}
 
     draw(glEngine: Engine):void { 

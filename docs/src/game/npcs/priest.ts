@@ -11,6 +11,7 @@ class Priest implements GameObject {
     private position:Vector = new Vector(0, 0.3, 0)
     private dimension:Vector = new Vector(0.015, 0.30,  0.05)
     private scale: number = 1.0
+    private angle: number = 0
     private geometry: Mesh
     private dialog:ConversationDialog
     private engine:Engine
@@ -26,6 +27,10 @@ class Priest implements GameObject {
         return this.id
     }
 
+    getPosition(): Vector {
+        return this.position
+    }
+
     update(_: number, inputs: {[key:string]: boolean} = {}){
         if(inputs.Space){
             this.dialog.next()
@@ -39,6 +44,8 @@ class Priest implements GameObject {
         if(inputs.KeyN){
             this.dialog.no()
         }
+
+        this.angle = Math.atan2( -this.engine.getCamera().getPosition().x - this.position.x, -this.engine.getCamera().getPosition().z - this.position.z ) * ( 180 / Math.PI );
     }
 
     draw(glEngine: Engine):void { 
@@ -47,7 +54,8 @@ class Priest implements GameObject {
             this.position.x, 
             this.position.y, 
             this.position.z, 
-            this.scale
+            this.scale,
+            this.angle
         )
     }
 

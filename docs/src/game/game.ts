@@ -5,21 +5,27 @@ import Church from './nature/church'
 import Priest from './npcs/priest'
 import Ground from './nature/ground'
 import Moon from './nature/moon'
+import Castle from './nature/castle'
+import Tree from './nature/tree'
+import TreeBush from './nature/treeBush'
+import { rn } from './engine/utils'
+import Skybox from './nature/skybox'
 
 class Game extends Engine {
 
     private constructor(gameTexture: HTMLImageElement){
         super(VertexShader, FragmentShader, gameTexture)
-        this.createPlayer(new Player(), {
-            angleY: 0
-        })
     }
 
     initGame(){
+        this.createPlayer(new Player(this), {
+            angleY: 0
+        })
+
         this.setLobbyScene()
         this.setWorldScene()
 
-        this.setScene('lobby')
+        this.setScene('world')
     } 
     
     setLobbyScene(){
@@ -28,25 +34,37 @@ class Game extends Engine {
     } 
     
     setWorldScene(){
+        // this.createGameObject(new Skybox(this), 'world')
         this.createGameObject(new Ground(this), 'world')
-        this.createGameObject(new Moon(this), 'world')
-    //     this.createGameObject(new Castle(this), 'world')
-    //     for(i = 0; i < 50; i++)
-    //     {
+        // this.createGameObject(new Moon(this), 'world')
+        // this.createGameObject(new Castle(this), 'world')
+        const treeA = new Tree(this)
+        treeA.setPosition(0, 0.3, 0)
+        this.createGameObject(treeA, 'world')
+        // const treeB = new Tree(this)
+        // treeB.setPosition(-0.5, 0.2, -2)
+        // this.createGameObject(treeB, 'world')
+
+        // for(let i = 0; i < 50; i++) {
             
-    //         this.createGameObject(new Tree(this), 'world')
-    //         this.createGameObject(new Tree(this), 'world')
-    //         this.createGameObject(new TreeBush(this), 'world')
-    //         this.createGameObject(new TreeBush(this), 'world')
-    //         mo(mud, 3 /*TYPE_SPRITE_BDB*/, rn(-3.0, -0.5), 0.6, -(i * 0.3), 0.015, 0.5, 0.015); // small or "big" trees
-    //         mo(mud, 3 /*TYPE_SPRITE_BDB*/, rn(0.5, 3.0), 0.6,   -(i * 0.3), 0.015, 0.5, 0.015);
+        //     const treeA = new Tree(this)
+        //     treeA.setPosition(-0.5, 0.2, -(i * 0.3))
 
-    //         // mo(mud, 3 /*TYPE_SPRITE_BDB*/, rn(-6.0, -4.0), 0.6, 4.0 -(i * 0.3), 0.015, 0.5, 0.015); // trees that are on the sides of the road
-    //         // mo(mud, 3 /*TYPE_SPRITE_BDB*/, rn( 4.0,  6.0), 0.6, 4.0 -(i * 0.3), 0.015, 0.5, 0.015);
+        //     // const treeB = new Tree(this)
+        //     // treeB.setPosition(rn(0.5, 3.0), 0.2, -(i * 0.3))
+            
+        //     // const treeBushA = new TreeBush(this)
+        //     // treeBushA.setPosition(rn(-3.0, -0.25), 0.1, 2.0 -(i * 0.3))
+            
+        //     // const treeBushB = new TreeBush(this)
+        //     // treeBushB.setPosition(rn(0.25, 3.0),   0.1, 2.0 -(i * 0.3))
 
-    //         mo(13 /*MESH_BUSH*/,  2 /*TYPE_SPRITE*/,  rn(-3.0, -0.25), 0.1, 2.0 -(i * 0.3),  0.05, 0.2, 0.05); // bushes
-    //         mo(13 /*MESH_BUSH*/,  2 /*TYPE_SPRITE*/,  rn(0.25, 3.0),   0.1, 2.0 -(i * 0.3),  0.0, 0.0, 0.0);
-    //     }
+            
+        //     this.createGameObject(treeA, 'world')
+        //     // this.createGameObject(treeB, 'world')
+        //     // this.createGameObject(treeBushA, 'world')
+        //     // this.createGameObject(treeBushB, 'world')
+        // }
 
     //     var j = 0;
     //     for(i = u.length-1; i >=0 ; i--)

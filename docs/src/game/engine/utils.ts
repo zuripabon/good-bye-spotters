@@ -1,6 +1,5 @@
 import Vector from './Vector'
 import Mesh from './Mesh'
-import GameObject from './GameObject';
 
 export const on = (element: Window | Document | HTMLElement, name:string, callback: () =>void) => {
     element.addEventListener(name, callback);

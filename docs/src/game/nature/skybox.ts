@@ -3,17 +3,18 @@ import Mesh from "../engine/Mesh"
 import Engine from "../engine"
 import GameObject from "../engine/GameObject"
 
-class Moon implements GameObject {
+class Skybox implements GameObject {
 
     private id:string 
-    private position: Vector = new Vector(0, 2.0,  -50.0)
-    private dimension: Vector = new Vector(0.5, 0.5, 0.5)
-    private scale: number = 2.0
+    private position: Vector = new Vector(0, -3.4, 0)
+    private scale: number = 5.1
     private geometry: Mesh
+    private engine: Engine
 
     constructor(glEngine: Engine, id?: string){
-        this.id = id || 'moon'
-        this.geometry = Mesh.plane(glEngine.glContext, 32*8, 96*8, 64*8, 112*8, 1.0, 0.5)
+        this.id = id || 'skybox'
+        this.geometry = Mesh.box(glEngine.glContext, 1, "C")
+        this.engine = glEngine
     }
 
     getId():string {
@@ -24,7 +25,10 @@ class Moon implements GameObject {
         return this.position
     }
 
-    update(){}
+    update(){
+        this.position.x = -this.engine.getCamera().getPosition().x
+        this.position.z = -this.engine.getCamera().getPosition().z
+    }
 
     draw(glEngine: Engine):void { 
         glEngine.drawObject(
@@ -37,4 +41,4 @@ class Moon implements GameObject {
     }
 }
 
-export default Moon
+export default Skybox

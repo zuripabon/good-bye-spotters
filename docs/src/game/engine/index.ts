@@ -29,6 +29,7 @@ abstract class Engine {
   private resultMatrix: Matrix
   private stack:Float32Array[] = []
   private matrixMode:string = ''
+  private shaderUniforms:{texture: number, over: number, sky: number[], factor: number} = {texture: 0, over: 1.0, sky: [0.0, 0.0], factor: 0.0}
 
   constructor(vertexShader: string, fragmentShader: string, texture: HTMLImageElement){
     this.canvas = document.createElement('canvas')
@@ -68,6 +69,22 @@ abstract class Engine {
     this.gameScenes[useScene] = [gameObject]
   }
 
+  getShadersUniforms() {
+    return this.shaderUniforms
+  }
+
+  setShadersUniforms(over: number = 1.0, sky: number[] = [0, 0], factor:number = 0.0) {
+    this.shaderUniforms = { texture: 0, over, sky, factor }
+  }
+
+  getCamera(): GameObject {
+    return this.gameCamera
+  }
+
+  getScene(): string {
+    return this.currentScene
+  }
+
   setScene(sceneId:string){
     if(this.gameScenes[sceneId]) {
       if(this.gameCamera.onSceneLeave){
@@ -96,11 +113,16 @@ abstract class Engine {
     }
   }
 
-  drawObject(geometry:Mesh, x:number, y:number, z:number, s:number){
+  drawObject(geometry:Mesh, x:number, y:number, z:number, s:number, a:number = 0){
       this.pushMatrix();
       this.translate(x, y, z);
-      this.scale(s, s, s);
-      this.shader.uniforms({ texture: 0,  over: 1.0 });
+      if(s > 1.0){
+        this.scale(s, s, s);
+      }
+      if(a){
+        this.rotate(a, 0.0, 1.0, 0.0);
+      }
+      this.shader.uniforms(this.getShadersUniforms());
       this.shader.draw(geometry);
       this.popMatrix();
   }
@@ -158,9 +180,10 @@ abstract class Engine {
     this.checkCollision(gameObjectId, gameObject, 'camera', this.gameCamera)
 
     // Rest objects collision
-    for (let i=0; i < this.gameScenes[this.currentScene].length; i++) { 
+    const gameObjects = this.gameObjects
+    for (let i=0; i < gameObjects.length; i++) { 
 
-      const currentGameObject = this.gameScenes[this.currentScene][i]
+      const currentGameObject = gameObjects[i]
       const currentGameObjectId = currentGameObject.getId()
 
       if(currentGameObjectId !== gameObjectId){
@@ -231,10 +254,12 @@ abstract class Engine {
           // console.log({currentFps})
 
           this.gameCamera?.update(delta, this.inputs)
-          
-          for (let i=0; i < this.gameScenes[this.currentScene].length; i++) { 
 
-            const gameObject = this.gameScenes[this.currentScene][i]
+          const gameObjects = this.gameObjects
+          
+          for (let i=0; i < gameObjects.length; i++) { 
+
+            const gameObject = gameObjects[i]
             const gameObjectId = gameObject.getId()
 
             gameObject?.update(delta, this.inputs)
@@ -300,9 +325,11 @@ abstract class Engine {
         this.gameCamera?.onMouseMove(e.movementX, e.movementY, this.lastDelta)
       }
 
-      for (let i=0; i < this.gameScenes[this.currentScene].length; i++) { 
+      const gameObjects = this.gameObjects
 
-        const gameObject = this.gameScenes[this.currentScene][i]
+      for (let i=0; i < gameObjects.length; i++) { 
+
+        const gameObject = gameObjects[i]
 
         if(gameObject.onMouseMove){
           gameObject.onMouseMove(e.movementX, e.movementY, this.lastDelta)
@@ -314,19 +341,31 @@ abstract class Engine {
     resize();
   }
 
+  private get gameObjects(){
+    // this.gameScenes[this.currentScene].sort(function(a:GameObject, b:GameObject)
+    // {
+    //     return b.getPosition().z - -a.getPosition().z;
+    // })
+
+    return this.gameScenes[this.currentScene]
+  }
+
   private render(){
     if(!this.texture){
       return
     }
+
     this.loadIdentity()
 
-    this.glContext.clearColor(0.0, 0.0, 0.0, 1.0)
-    this.glContext.clear(this.glContext.COLOR_BUFFER_BIT)
+    this.glContext.clearColor(this.getShadersUniforms().sky[0], 0.0, this.getShadersUniforms().sky[1], 1.0)
+    this.glContext.clear(this.glContext.COLOR_BUFFER_BIT | this.glContext.DEPTH_BUFFER_BIT)
 
     this.gameCamera?.draw(this)
 
-    for (let i=0; i < this.gameScenes[this.currentScene].length; i++) { 
-      const gameObject = this.gameScenes[this.currentScene][i]
+    const gameObjects = this.gameObjects
+
+    for (let i=0; i < gameObjects.length; i++) { 
+      const gameObject = gameObjects[i]
       gameObject.draw(this)
     }
 

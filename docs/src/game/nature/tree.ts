@@ -3,21 +3,25 @@ import Mesh from "../engine/Mesh"
 import Engine from "../engine"
 import GameObject from "../engine/GameObject"
 
-class Moon implements GameObject {
+class Tree implements GameObject {
 
     private id:string 
-    private position: Vector = new Vector(0, 2.0,  -50.0)
-    private dimension: Vector = new Vector(0.5, 0.5, 0.5)
-    private scale: number = 2.0
+    private position: Vector = new Vector(0, 0,  0)
+    private dimension: Vector = new Vector(0.015, 0.5, 0.015)
+    private scale: number = 1.0
     private geometry: Mesh
 
     constructor(glEngine: Engine, id?: string){
-        this.id = id || 'moon'
-        this.geometry = Mesh.plane(glEngine.glContext, 32*8, 96*8, 64*8, 112*8, 1.0, 0.5)
+        this.id = id || 'tree'
+        this.geometry = Mesh.plane(glEngine.glContext, 96*8, 64*8, 112*8, 95*8, 0.35, 0.70)
     }
 
     getId():string {
         return this.id
+    }
+
+    setPosition(x:number, y:number, z:number): void {
+        this.position = new Vector(x, y, z)
     }
 
     getPosition(): Vector {
@@ -37,4 +41,4 @@ class Moon implements GameObject {
     }
 }
 
-export default Moon
+export default Tree

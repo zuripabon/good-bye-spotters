@@ -3,6 +3,7 @@ import Vector from "./Vector"
 
 interface GameObject {
     getId():string
+    getPosition():Vector
     update(delta: number, inputs: {[key:string]: boolean}):void
     draw(engine:Engine):void
     onSceneEnter?(sceneId: string): void

@@ -3,17 +3,17 @@ import Mesh from "../engine/Mesh"
 import Engine from "../engine"
 import GameObject from "../engine/GameObject"
 
-class Moon implements GameObject {
+class Castle implements GameObject {
 
     private id:string 
-    private position: Vector = new Vector(0, 2.0,  -50.0)
+    private position: Vector = new Vector(0, 0.75, -40.0)
     private dimension: Vector = new Vector(0.5, 0.5, 0.5)
-    private scale: number = 2.0
+    private scale: number = 1.5
     private geometry: Mesh
 
     constructor(glEngine: Engine, id?: string){
-        this.id = id || 'moon'
-        this.geometry = Mesh.plane(glEngine.glContext, 32*8, 96*8, 64*8, 112*8, 1.0, 0.5)
+        this.id = id || 'castle'
+        this.geometry = Mesh.plane(glEngine.glContext, 32*8, 80*8, 63*8, 96*8, 1.0, 0.50)
     }
 
     getId():string {
@@ -37,4 +37,4 @@ class Moon implements GameObject {
     }
 }
 
-export default Moon
+export default Castle

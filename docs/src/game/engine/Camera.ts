@@ -25,12 +25,16 @@ class Camera implements GameObject {
         return 'camera'
     }
 
+    getPosition(): Vector {
+        return this.position
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     update(delta: number, inputs: {[key:string]: boolean}){
         
     }
 
-    draw(glEngine: Engine):void { 
+    draw(glEngine: Engine):void {
         glEngine.rotate(this.rotation.x, 1, 0, 0);
         glEngine.rotate(this.rotation.y, 0, 1, 0);
         glEngine.translate(this.position.x, this.position.y, this.position.z);
@@ -44,12 +48,14 @@ class Camera implements GameObject {
         return [minBorderBox, maxBorderBox]
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onCollideEnter(gameObjectId: string, sceneId: string): void {
-        throw new Error(`Not implemented: colliding in with ${gameObjectId} for ${sceneId}`)
+        return;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onCollideLeave(gameObjectId: string, sceneId: string): void {
-        throw new Error(`Not implemented: colliding out with ${gameObjectId} for ${sceneId}`)
+        return;
     }
 
 }

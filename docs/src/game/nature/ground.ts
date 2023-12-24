@@ -7,7 +7,7 @@ class Ground implements GameObject {
 
     private id:string 
     private position: Vector = new Vector(0,0,0)
-    private scale: number = 1.0
+    private scale: number = 100.0
     private geometry: Mesh
 
     constructor(glEngine: Engine, id?: string){
@@ -17,6 +17,10 @@ class Ground implements GameObject {
 
     getId():string {
         return this.id
+    }
+
+    getPosition(): Vector {
+        return this.position
     }
 
     update(){}
