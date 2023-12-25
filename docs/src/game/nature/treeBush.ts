@@ -9,11 +9,14 @@ class TreeBush implements GameObject {
     private position: Vector = new Vector(0, 0,  0)
     private dimension: Vector = new Vector(0.05, 0.2, 0.05)
     private scale: number = 1.0
+    private angle: number = 0.0
     private geometry: Mesh
+    private engine: Engine
 
     constructor(glEngine: Engine, id?: string){
         this.id = id || 'treeBush'
         this.geometry = Mesh.plane(glEngine.glContext, 80*8, 63*8, 95*8, 79*8, 0.20, 0.20)
+        this.engine = glEngine
     }
 
     getId():string {
@@ -28,7 +31,9 @@ class TreeBush implements GameObject {
         this.position = new Vector(x, y, z)
     }
 
-    update(){}
+    update(){
+        this.angle = Math.atan2( -this.engine.getCamera().getPosition().x - this.position.x, -this.engine.getCamera().getPosition().z - this.position.z ) * ( 180 / Math.PI );
+    }
 
     draw(glEngine: Engine):void { 
         glEngine.drawObject(
@@ -36,7 +41,8 @@ class TreeBush implements GameObject {
             this.position.x, 
             this.position.y, 
             this.position.z, 
-            this.scale
+            this.scale,
+            this.angle
         )
     }
 }

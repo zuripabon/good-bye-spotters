@@ -19,6 +19,7 @@ abstract class Engine {
   protected currentScene:string = 'default'
   protected gameScenes:{[key:string]: GameObject[]} = {}
   protected fps:number = 30
+  protected interObjectCollisionsEnabled: boolean = false
   
   private canvas: HTMLCanvasElement
   private shader: Shader
@@ -250,7 +251,12 @@ abstract class Engine {
     // Camera collision
     this.checkCollision(gameObjectId, gameObject, 'camera', this.gameCamera)
 
-    // Rest objects collision
+    
+    if(!this.interObjectCollisionsEnabled){
+      return;
+    }
+
+    // Rest objects collision between all of them, do we really want this? looks too much
     const gameObjects = this.gameObjects
     for (let i=0; i < gameObjects.length; i++) { 
 
@@ -278,29 +284,31 @@ abstract class Engine {
     const gameObjectABorderBox = gameObjectA.getCollider()
     const gameObjectBBorderBox = gameObjectB.getCollider()
     const isColliding = abab(gameObjectABorderBox, gameObjectBBorderBox)
+    const abId = `${gameObjectAId}${gameObjectBId}`
+    const baId = `${gameObjectBId}${gameObjectAId}`
     
     if(isColliding){
-      if(!this.gameObjectCollisions[gameObjectAId] && gameObjectA.onCollideEnter){
+      if(!this.gameObjectCollisions[abId] && gameObjectA.onCollideEnter){
         gameObjectA.onCollideEnter(gameObjectBId, this.currentScene)
-        this.gameObjectCollisions[gameObjectAId] = true
+        this.gameObjectCollisions[abId] = true
       } 
 
-      if(!this.gameObjectCollisions[gameObjectBId] && gameObjectB.onCollideEnter){
+      if(!this.gameObjectCollisions[baId] && gameObjectB.onCollideEnter){
         gameObjectB.onCollideEnter(gameObjectAId, this.currentScene)
-        this.gameObjectCollisions[gameObjectBId] = true
+        this.gameObjectCollisions[baId] = true
       }
 
       return;
     }
 
-    if(this.gameObjectCollisions[gameObjectAId] && gameObjectA.onCollideLeave){
+    if(this.gameObjectCollisions[abId] && gameObjectA.onCollideLeave){
       gameObjectA.onCollideLeave(gameObjectBId, this.currentScene)
-      this.gameObjectCollisions[gameObjectAId] = false
+      this.gameObjectCollisions[abId] = false
     }
     
-    if(this.gameObjectCollisions[gameObjectBId] && gameObjectB.onCollideLeave){
+    if(this.gameObjectCollisions[baId] && gameObjectB.onCollideLeave){
       gameObjectB.onCollideLeave(gameObjectAId, this.currentScene)
-      this.gameObjectCollisions[gameObjectBId] = false
+      this.gameObjectCollisions[baId] = false
     }
     
   }

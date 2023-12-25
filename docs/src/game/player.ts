@@ -6,6 +6,7 @@ import Engine from "./engine";
 class Player extends Camera {
 
     private canMove:boolean = true
+    private canMoveUp:boolean = true
     private engine: Engine
 
     constructor(glEngine: Engine){
@@ -29,7 +30,7 @@ class Player extends Camera {
         let side = 0.0
         let strife = 0.0
 
-        if(inputs.KeyW || inputs.ArrowUp){
+        if((inputs.KeyW || inputs.ArrowUp) && this.canMoveUp){
             speed = -delta * 1.0
         }
         
@@ -59,6 +60,7 @@ class Player extends Camera {
         this.position.x += Math.sin(stepRot) * speed;
         this.position.z -= Math.cos(stepRot) * speed;
 
+        // this.canMoveUp = true
         // this.position.x = clamp(this.position.x, -4.0, 4.0);
         // this.position.z = clamp(this.position.z, -1.2, 39.8);
     }
@@ -85,8 +87,25 @@ class Player extends Camera {
     onCollideEnter(gameObjectId: string, sceneId: string): void {
         if(sceneId === 'lobby' && gameObjectId === 'priest'){
             this.canMove = false
+            return;
         }
+        
+        if(sceneId === 'world' && gameObjectId.includes('tree')){
+            this.canMoveUp = false
+            return;
+        }
+
     }
+    
+    onCollideLeave(gameObjectId: string, sceneId: string): void {
+        
+        if(sceneId === 'world' && gameObjectId.includes('tree')){
+            this.canMoveUp = true
+            return;
+        }
+
+    }
+
 }
 
 export default Player

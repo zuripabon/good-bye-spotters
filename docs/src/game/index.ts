@@ -7,8 +7,8 @@ import Ground from './nature/ground'
 import Moon from './nature/moon'
 import Tree from './nature/tree'
 import TreeBush from './nature/treeBush'
-import { rn } from './engine/utils'
 import Skybox from './nature/skybox'
+import { rn } from './engine/utils'
 
 class Game extends Engine {
 
@@ -38,18 +38,17 @@ class Game extends Engine {
 
         for(let i = 0; i < 30; i++) {
             
-            const treeA = new Tree(this)
+            const treeA = new Tree(this, `tree-${i}-left`)
             treeA.setPosition(rn(-3.0, -0.5), 0.6, -(i * 0.3))
 
-            const treeB = new Tree(this)
+            const treeB = new Tree(this, `tree-${i}-right`)
             treeB.setPosition(rn(0.5, 3.0), 0.6, -(i * 0.3))
             
-            const treeBushA = new TreeBush(this)
+            const treeBushA = new TreeBush(this, `bush-${i}-left`)
             treeBushA.setPosition(rn(-3.0, -0.25), 0.1, 2.0 -(i * 0.3))
             
-            const treeBushB = new TreeBush(this)
+            const treeBushB = new TreeBush(this, `bush-${i}-right`)
             treeBushB.setPosition(rn(0.25, 3.0),   0.1, 2.0 -(i * 0.3))
-
             
             this.createGameObject(treeA, 'world')
             this.createGameObject(treeB, 'world')

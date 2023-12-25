@@ -37,17 +37,12 @@ class Texture {
         context.pixelStorei(context.UNPACK_FLIP_Y_WEBGL, 1)
         context.activeTexture(context.TEXTURE0 + (unit|| 0))
         context.bindTexture(context.TEXTURE_2D, this.id)
-        //context.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true); // now we are using enable blend and it works lol
         
         context.texParameteri(context.TEXTURE_2D, context.TEXTURE_MAG_FILTER, magFilter)
         context.texParameteri(context.TEXTURE_2D, context.TEXTURE_MIN_FILTER, minFilter)
         context.texParameteri(context.TEXTURE_2D, context.TEXTURE_WRAP_S, context.CLAMP_TO_EDGE)
         context.texParameteri(context.TEXTURE_2D, context.TEXTURE_WRAP_T, context.CLAMP_TO_EDGE)
         context.texImage2D(context.TEXTURE_2D, 0, this.format, this.format, this.type, image);
-        // no mipmaps
-        //if (options.minFilter && options.minFilter != gl.NEAREST && options.minFilter != gl.LINEAR) {
-        //  gl.generateMipmap(3553 /*gl.TEXTURE_2D*/);
-        //}
     }
 
     static fromImage(context: WebGLRenderingContext, image: HTMLImageElement) {
