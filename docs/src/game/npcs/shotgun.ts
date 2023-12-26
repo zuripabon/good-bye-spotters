@@ -2,15 +2,18 @@ import Vector from "../engine/Vector"
 import Mesh from "../engine/Mesh"
 import Engine from "../engine"
 import GameObject from "../engine/GameObject"
+import { clamp } from "../engine/utils"
 
 class Shotgun implements GameObject {
 
     private id:string 
-    private position: Vector = new Vector(0.2,   -0.1,  -0.18)
+    private position: Vector = new Vector(0.1, -0.15, -0.135)
+    private rotation: Vector = new Vector(0, 0, 0)
     private dimension: Vector = new Vector(0 , 0, 0)
-    private scale: number = 0.3
-    private angle:number = 0.0
+    private scale: number = 0.05
+    private light: number = 1
     private visible: boolean = false
+    private animationSpeed: number = 3
     private geometry: Mesh
     private engine: Engine
 
@@ -22,10 +25,6 @@ class Shotgun implements GameObject {
 
     getId():string {
         return this.id
-    }
-
-    setPosition(x:number, y:number, z:number): void {
-        this.position = new Vector(x, y, z)
     }
 
     setScale(scale: number){
@@ -44,23 +43,60 @@ class Shotgun implements GameObject {
         return this.position
     }
 
-    update(){
-        this.position.x = -this.engine.getCamera().getPosition().x
-        this.position.z = -this.engine.getCamera().getPosition().z - 0.5
-        // this.position.y = -this.engine.getCamera().getPosition().y
+    setPosition(x:number, y:number, z:number): void {
+        this.position.x = x || this.position.x
+        this.position.y = y || this.position.y
+        this.position.z = z || this.position.z
+    }
+
+    getRotation(): Vector {
+        return this.rotation
+    }
+
+    setRotation(x:number|null, y:number|null, z:number|null): void {
+        this.rotation.x = x !== null ? x : this.rotation.x
+        this.rotation.y = y !== null ? y : this.rotation.y
+        this.rotation.z = z !== null ? z : this.rotation.z
+    }
+
+    update(delta: number){
+        // animate the shotgun moving back to position
+        this.position.x += (Math.sin(this.engine.getTotalGameTime() * this.animationSpeed) * 0.00010);
+        this.position.y += (Math.sin(this.engine.getTotalGameTime() * this.animationSpeed) * 0.00010);
+        this.position.z = clamp(this.position.z - delta * 0.25, -0.15, -0.12);
     }
 
     draw(glEngine: Engine):void {
-        // glEngine.modelView.pushMatrix()
+        glEngine.modelView.pushMatrix()
+        glEngine.modelView.loadIdentity()
         glEngine.drawObject(
             this.geometry, 
-            this.position.x, 
-            this.position.y, 
-            this.position.z, 
+            this.position,
+            this.rotation,
             this.scale,
-            this.angle
+            this.light
         )
-        // glEngine.modelView.popMatrix()
+        glEngine.modelView.popMatrix()
+    }
+
+    onMouseDown(){
+        this.light = 1.3;
+        this.position.z = -0.11;
+    }
+    
+    onMouseUp(){
+        
+        const camera = this.engine.getCamera()
+        const bullet = this.engine.getGameObjectById('bullet')
+        bullet?.setPosition(-camera.getPosition().x, null, -camera.getPosition().z)
+        
+        this.engine.setState({ 
+            cameraRotationY : camera.getRotation().y * 3.14 / 180.0
+        })
+        
+        bullet?.setVisible(true)
+        
+        this.light = 1;
     }
 
     getCollider():[Vector, Vector] {

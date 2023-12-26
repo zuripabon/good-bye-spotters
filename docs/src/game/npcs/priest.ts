@@ -9,9 +9,9 @@ class Priest implements GameObject {
 
     private id:string 
     private position:Vector = new Vector(0, 0.3, 0)
+    private rotation: Vector = new Vector(0, 0, 0)
     private dimension:Vector = new Vector(0.015, 0.30,  0.05)
     private scale: number = 1.0
-    private angle: number = 0
     private visible: boolean = true
     private geometry: Mesh
     private dialog:ConversationDialog
@@ -30,6 +30,22 @@ class Priest implements GameObject {
 
     getPosition(): Vector {
         return this.position
+    }
+
+    setPosition(x:number|null, y:number|null, z:number|null): void {
+        this.position.x = x !== null ? x : this.position.x
+        this.position.y = y !== null ? y : this.position.y
+        this.position.z = z !== null ? z : this.position.z
+    }
+
+    getRotation(): Vector {
+        return this.rotation
+    }
+
+    setRotation(x:number|null, y:number|null, z:number|null): void {
+        this.rotation.x = x !== null ? x : this.rotation.x
+        this.rotation.y = y !== null ? y : this.rotation.y
+        this.rotation.z = z !== null ? z : this.rotation.z
     }
 
     isVisible(): boolean {
@@ -62,17 +78,15 @@ class Priest implements GameObject {
             }
         }
 
-        this.angle = Math.atan2( -this.engine.getCamera().getPosition().x - this.position.x, -this.engine.getCamera().getPosition().z - this.position.z ) * ( 180 / Math.PI );
+        this.rotation.y = Math.atan2( -this.engine.getCamera().getPosition().x - this.position.x, -this.engine.getCamera().getPosition().z - this.position.z ) * ( 180 / Math.PI );
     }
 
     draw(glEngine: Engine):void { 
         glEngine.drawObject(
             this.geometry, 
-            this.position.x, 
-            this.position.y, 
-            this.position.z, 
-            this.scale,
-            this.angle
+            this.position,
+            this.rotation,
+            this.scale
         )
     }
 

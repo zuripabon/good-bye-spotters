@@ -7,6 +7,7 @@ class Moon implements GameObject {
 
     private id:string 
     private position: Vector = new Vector(0, 2.0,  -50.0)
+    private rotation: Vector = new Vector(0, 0, 0)
     private dimension: Vector = new Vector(0.5, 0.5, 0.5)
     private scale: number = 2.0
     private visible: boolean = true
@@ -25,7 +26,22 @@ class Moon implements GameObject {
         return this.position
     }
 
-    
+    setPosition(x:number|null, y:number|null, z:number|null): void {
+        this.position.x = x !== null ? x : this.position.x
+        this.position.y = y !== null ? y : this.position.y
+        this.position.z = z !== null ? z : this.position.z
+    }
+
+    getRotation(): Vector {
+        return this.rotation
+    }
+
+    setRotation(x:number|null, y:number|null, z:number|null): void {
+        this.rotation.x = x !== null ? x : this.rotation.x
+        this.rotation.y = y !== null ? y : this.rotation.y
+        this.rotation.z = z !== null ? z : this.rotation.z
+    }
+
     isVisible(): boolean {
         return this.visible
     }
@@ -39,9 +55,8 @@ class Moon implements GameObject {
     draw(glEngine: Engine):void { 
         glEngine.drawObject(
             this.geometry, 
-            this.position.x, 
-            this.position.y, 
-            this.position.z, 
+            this.position,
+            this.rotation,
             this.scale
         )
     }

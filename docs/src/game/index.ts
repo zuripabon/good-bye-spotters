@@ -11,6 +11,7 @@ import Skybox from './nature/skybox'
 import { enumKeys, rn } from './engine/utils'
 import Npc, { NpcTypes } from './npcs/npc'
 import Shotgun from './npcs/shotgun'
+import Bullet from './npcs/bullet'
 
 class Game extends Engine {
 
@@ -37,6 +38,7 @@ class Game extends Engine {
         this.createGameObject(new Skybox(this), 'world')
         this.createGameObject(new Ground(this), 'world')
         this.createGameObject(new Moon(this), 'world')
+        
 
         for(let i = 0; i < 30; i++) {
             
@@ -68,6 +70,7 @@ class Game extends Engine {
         }
 
         this.createGameObject(new Shotgun(this), 'world')
+        this.createGameObject(new Bullet(this), 'world')
     }
 
     static run(gameTexture: HTMLImageElement){

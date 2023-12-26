@@ -5,6 +5,7 @@ import GameObject from './GameObject'
 import Camera from './Camera'
 import { on, abab } from './utils'
 import ModelView from './ModelView'
+import Vector from './Vector'
 
 // A WEBGL program is a combination shader programs which are dynamically controlled with javascript code
 abstract class Engine {
@@ -26,6 +27,7 @@ abstract class Engine {
   private texture: Texture | null = null
   private gameObjectCollisions:{[key:string]: boolean} = {}
   private shaderUniforms:{texture: number, over: number, sky: number[], factor: number} = {texture: 0, over: 1.0, sky: [0.0, 0.0], factor: 0.0}
+  private totalGameTime: number = 0
 
   constructor(vertexShader: string, fragmentShader: string, texture: HTMLImageElement){
     this.canvas = document.createElement('canvas')
@@ -110,6 +112,10 @@ abstract class Engine {
     }
   }
 
+  getTotalGameTime(){
+    return this.totalGameTime
+  }
+
   getState(){
     return this.gameState
   }
@@ -120,21 +126,23 @@ abstract class Engine {
 
   drawObject(
     geometry:Mesh, 
-    x:number, 
-    y:number, 
-    z:number, 
+    position:Vector, 
+    rotation:Vector, 
     s:number, 
-    a?:number, 
     over?:number, 
     factor?:number
     ) {
       this.modelView.pushMatrix();
-      this.modelView.translate(x, y, z);
+      this.modelView.translate(position.x, position.y, position.z);
       if(s !== 1.0){
         this.modelView.scale(s, s, s);
       }
-      if(a){
-        this.modelView.rotate(a, 0.0, 1.0, 0.0);
+      if(rotation.x){
+        this.modelView.rotate(rotation.x, 1.0, 0.0, 0.0);
+      }if(rotation.y){
+        this.modelView.rotate(rotation.y, 0.0, 1.0, 0.0);
+      }if(rotation.z){
+        this.modelView.rotate(rotation.z, 0.0, 0.0, 1.0);
       }
       const shaderUniforms = this.getShadersUniforms()
       this.shader.uniforms({...shaderUniforms, over: over || shaderUniforms.over, factor: factor || shaderUniforms.factor});
@@ -156,6 +164,7 @@ abstract class Engine {
       
       if (elapsed > fpsInterval) {
           const delta = elapsed / 1000
+          this.totalGameTime += delta
           this.lastDelta = delta
         
           // const currentFps = Math.round(1000 / ((now - startTime) / ++frameCount) * 100) / 100;
@@ -251,6 +260,54 @@ abstract class Engine {
 
         if(gameObject.onMouseMove){
           gameObject.onMouseMove(e.movementX, e.movementY, this.lastDelta)
+        }
+      }
+
+    })
+    this.canvas.addEventListener('mousedown', (e:MouseEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+
+      if(this.gameCamera.onMouseDown){
+        this.gameCamera?.onMouseDown(e.movementX, e.movementY, this.lastDelta)
+      }
+
+      const gameObjects = this.gameObjects
+
+      for (let i=0; i < gameObjects.length; i++) { 
+
+        const gameObject = gameObjects[i]
+
+        if(!gameObject.isVisible()){
+          continue;
+        }
+
+        if(gameObject.onMouseDown){
+          gameObject.onMouseDown(e.movementX, e.movementY, this.lastDelta)
+        }
+      }
+
+    })
+    this.canvas.addEventListener('mouseup', (e:MouseEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+
+      if(this.gameCamera.onMouseUp){
+        this.gameCamera?.onMouseUp(e.movementX, e.movementY, this.lastDelta)
+      }
+
+      const gameObjects = this.gameObjects
+
+      for (let i=0; i < gameObjects.length; i++) { 
+
+        const gameObject = gameObjects[i]
+
+        if(!gameObject.isVisible()){
+          continue;
+        }
+
+        if(gameObject.onMouseUp){
+          gameObject.onMouseUp(e.movementX, e.movementY, this.lastDelta)
         }
       }
 

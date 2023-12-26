@@ -7,6 +7,7 @@ class Skybox implements GameObject {
 
     private id:string 
     private position: Vector = new Vector(0, -3.4, 0)
+    private rotation: Vector = new Vector(0, 0, 0)
     private scale: number = 5
     private visible: boolean = true
     private geometry: Mesh
@@ -35,6 +36,22 @@ class Skybox implements GameObject {
         return this.position
     }
 
+    setPosition(x:number|null, y:number|null, z:number|null): void {
+        this.position.x = x !== null ? x : this.position.x
+        this.position.y = y !== null ? y : this.position.y
+        this.position.z = z !== null ? z : this.position.z
+    }
+
+    getRotation(): Vector {
+        return this.rotation
+    }
+
+    setRotation(x:number|null, y:number|null, z:number|null): void {
+        this.rotation.x = x !== null ? x : this.rotation.x
+        this.rotation.y = y !== null ? y : this.rotation.y
+        this.rotation.z = z !== null ? z : this.rotation.z
+    }
+
     update(){
         this.position.x = -this.engine.getCamera().getPosition().x
         this.position.z = -this.engine.getCamera().getPosition().z
@@ -43,9 +60,8 @@ class Skybox implements GameObject {
     draw(glEngine: Engine):void { 
         glEngine.drawObject(
             this.geometry, 
-            this.position.x, 
-            this.position.y, 
-            this.position.z, 
+            this.position,
+            this.rotation, 
             this.scale
         )
     }

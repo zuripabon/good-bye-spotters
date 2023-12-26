@@ -137,7 +137,7 @@ var GL = (function() {
     };
     gl.popMatrix = function() {
       var m = stack.pop();
-      console.log({m})
+      // console.log({m})
       gl[matrix].m = /*hasFloat32Array ?*/ new Float32Array(m); // : m;
     };
   
@@ -1135,7 +1135,7 @@ var GL = (function() {
               this.uniformLocations[name] = location;
               var value = uniforms[name];
               
-              console.log({name, value})
+              // console.log({name, value})
               if (value instanceof Vector) 
               {
                   value = [value.x, value.y, value.z];
@@ -1213,7 +1213,7 @@ var GL = (function() {
           var used = this.usedMatrices;
           var MVM = gl.modelviewMatrix;
           var PM = gl.projectionMatrix;
-          console.log(1,2, MVM, PM, PM.multiply(MVM))
+          // console.log(1,2, MVM, PM, PM.multiply(MVM))
   //        var MVMI = (used.MVMI || used.NM) ? MVM.inverse() : null;
   //        var PMI = (used.PMI) ? PM.inverse() : null;
   //        var MVPM = (used.MVPM || used.MVPMI) ? PM.multiply(MVM) : null; // original
@@ -1265,7 +1265,7 @@ var GL = (function() {
           // Draw the geometry.
           if (length && (!indexBuffer || indexBuffer.buffer)) 
           {
-            console.log('here', indexBuffer.buffer.length)
+            // console.log('here', indexBuffer.buffer.length)
               if (indexBuffer) 
               {
                   gl.bindBuffer(34963 /*gl.ELEMENT_ARRAY_BUFFER*/, indexBuffer.buffer);
