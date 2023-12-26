@@ -8,6 +8,7 @@ class Ground implements GameObject {
     private id:string 
     private position: Vector = new Vector(0,0,0)
     private scale: number = 100.0
+    private visible: boolean = true
     private geometry: Mesh
 
     constructor(glEngine: Engine, id?: string){
@@ -21,6 +22,15 @@ class Ground implements GameObject {
 
     getPosition(): Vector {
         return this.position
+    }
+
+    
+    isVisible(): boolean {
+        return this.visible
+    }
+
+    setVisible(visible: boolean): void {
+        this.visible = visible
     }
 
     update(){}

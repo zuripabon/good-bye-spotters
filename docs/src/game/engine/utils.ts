@@ -79,3 +79,7 @@ export const abab = function(a: [Vector, Vector], b: [Vector, Vector]){
         a[1].z >= b[0].z
     );
 };
+
+export function enumKeys<O extends object, K extends keyof O = keyof O>(obj: O): K[] {
+    return Object.keys(obj).filter(k => Number.isNaN(+k)) as K[];
+}

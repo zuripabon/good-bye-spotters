@@ -73,15 +73,22 @@ class Player extends Camera {
     }
 
     onSceneEnter(sceneId: string): void {
+
+        if(sceneId === 'lobby'){
+            this.engine.setShadersUniforms(1.0, [0.0, 0.0])
+        }
+
         if(sceneId === 'world'){
             this.engine.setShadersUniforms(1.0, [0.2, 0.1])
-            this.position.x = 0.0
-            this.position.y = -0.45
-            this.position.z = -1.0
-            this.rotation.x = 0
-            this.rotation.y = 0
-            this.canMove = true
         }
+
+        this.position.x = 0.0
+        this.position.y = -0.45
+        this.position.z = -1.0
+        this.rotation.x = 0
+        this.rotation.y = 0
+        this.canMove = true
+        this.canMoveUp = true
     }
 
     onCollideEnter(gameObjectId: string, sceneId: string): void {

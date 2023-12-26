@@ -8,6 +8,7 @@ class Skybox implements GameObject {
     private id:string 
     private position: Vector = new Vector(0, -3.4, 0)
     private scale: number = 5
+    private visible: boolean = true
     private geometry: Mesh
     private engine: Engine
 
@@ -19,6 +20,15 @@ class Skybox implements GameObject {
 
     getId():string {
         return this.id
+    }
+
+    
+    isVisible(): boolean {
+        return this.visible
+    }
+
+    setVisible(visible: boolean): void {
+        this.visible = visible
     }
 
     getPosition(): Vector {

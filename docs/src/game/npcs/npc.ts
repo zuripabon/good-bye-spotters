@@ -3,29 +3,63 @@ import Mesh from "../engine/Mesh"
 import Engine from "../engine"
 import GameObject from "../engine/GameObject"
 import ConversationDialog from "../engine/ConversationDialog"
-import { priestDialog } from "./dialogs"
+import { npcDialogs } from "./dialogs"
 
-class Priest implements GameObject {
+export enum NpcTypes {
+    npc0 = 'npc0',
+    npc1 = 'npc1',
+    npc2 = 'npc2',
+    npc3 = 'npc3',
+    npc4 = 'npc4',
+    npc5 = 'npc5',
+}
+
+const NPC_MESHES = {
+    [NpcTypes.npc0]: [0,         0,  15*8,     31*8,     0.13,   0.30],
+    [NpcTypes.npc1]: [32*8,      0,  47*8,     31*8,     0.13,   0.30],
+    [NpcTypes.npc2]: [48*8,      0,  63*8,     31*8,     0.13,   0.30],
+    [NpcTypes.npc3]: [80*8,      0,  95*8,     31*8,     0.13,   0.30],
+    [NpcTypes.npc4]: [96*8,      0,  111*8,    31*8,     0.13,   0.30],
+    [NpcTypes.npc5]: [112*8,     0,  128*8,    31*8,     0.13,   0.30],
+}
+
+class Npc implements GameObject {
 
     private id:string 
     private position:Vector = new Vector(0, 0.3, 0)
     private dimension:Vector = new Vector(0.015, 0.30,  0.05)
-    private scale: number = 1.0
-    private angle: number = 0
+    private scale: number = 1.0 
+    private angle: number = 0.0
+    private light: number = 1.0
     private visible: boolean = true
     private geometry: Mesh
     private dialog:ConversationDialog
     private engine:Engine
 
-    constructor(glEngine: Engine, id?: string){
-        this.id = id || 'priest'
+    constructor(glEngine: Engine, id: NpcTypes){
+        this.id = id || 'Enemy'
         this.engine = glEngine
-        this.geometry = Mesh.plane(this.engine.glContext, 512, 0, 640, 254, 0.13, 0.30)
-        this.dialog = new ConversationDialog(priestDialog)
+
+        const npcMesh = NPC_MESHES[id]
+        this.geometry = Mesh.plane(glEngine.glContext, npcMesh[0], npcMesh[1], npcMesh[2], npcMesh[3], npcMesh[4], npcMesh[5])
+
+        this.dialog = new ConversationDialog(npcDialogs[id])
     }
 
     getId():string {
         return this.id
+    }
+
+    setPosition(x:number, y:number, z:number): void {
+        this.position = new Vector(x, y, z)
+    }
+
+    setScale(scale: number){
+        this.scale = scale
+    }
+
+    setLight(light: number){
+        this.light= light
     }
 
     getPosition(): Vector {
@@ -48,7 +82,8 @@ class Priest implements GameObject {
                 this.dialog.next()
                 if(this.dialog.isDialogOver()){
                     this.dialog.end()
-                    this.engine.setScene('world')
+                    this.engine.getGameObjectById('shotgun')?.setVisible(true)
+                    // this.engine.setScene('lobby')
                     return;
                 }
             }
@@ -56,10 +91,10 @@ class Priest implements GameObject {
             if(inputs.KeyY){
                 this.dialog.yes()
             }
-
             if(inputs.KeyN){
                 this.dialog.no()
             }
+
         }
 
         this.angle = Math.atan2( -this.engine.getCamera().getPosition().x - this.position.x, -this.engine.getCamera().getPosition().z - this.position.z ) * ( 180 / Math.PI );
@@ -72,7 +107,8 @@ class Priest implements GameObject {
             this.position.y, 
             this.position.z, 
             this.scale,
-            this.angle
+            this.angle,
+            this.light
         )
     }
 
@@ -83,6 +119,7 @@ class Priest implements GameObject {
     }
 
     onCollideEnter(): void {
+        console.log('colliding', this.id)
         this.dialog.start()
     }
 
@@ -91,4 +128,4 @@ class Priest implements GameObject {
     }
 }
 
-export default Priest
+export default Npc

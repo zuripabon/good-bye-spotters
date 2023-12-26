@@ -8,6 +8,7 @@ class Camera implements GameObject {
     protected dimension:Vector = new Vector(0, 0, 0)
     protected rotation: Vector = new Vector(0, 0, 0)
     protected position: Vector = new Vector(0, 0, 0)
+    private visible: boolean = true
 
     constructor(position?: Vector, rotation?:Vector, dimension?: Vector) {
         if(position){
@@ -27,6 +28,14 @@ class Camera implements GameObject {
 
     getPosition(): Vector {
         return this.position
+    }
+
+    isVisible(): boolean {
+        return this.visible
+    }
+
+    setVisible(visible: boolean): void {
+        this.visible = visible
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

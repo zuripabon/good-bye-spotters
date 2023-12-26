@@ -9,6 +9,7 @@ class Moon implements GameObject {
     private position: Vector = new Vector(0, 2.0,  -50.0)
     private dimension: Vector = new Vector(0.5, 0.5, 0.5)
     private scale: number = 2.0
+    private visible: boolean = true
     private geometry: Mesh
 
     constructor(glEngine: Engine, id?: string){
@@ -22,6 +23,15 @@ class Moon implements GameObject {
 
     getPosition(): Vector {
         return this.position
+    }
+
+    
+    isVisible(): boolean {
+        return this.visible
+    }
+
+    setVisible(visible: boolean): void {
+        this.visible = visible
     }
 
     update(){}

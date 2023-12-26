@@ -4,9 +4,11 @@ import SequentialDialog from "./SequentialDialog"
 class ConversationDialog extends MultiDialog {
 
     private isQuestioning: boolean = false
-    private hasEnded: boolean = false
     private yesNoResponses: SequentialDialog[] = []
     
+    hasEnded: boolean = false
+    hasStarted: boolean = false
+
     constructor(dialogs: {dialog: string[], yesNo: string[]}[]) {
         super(dialogs.map(({dialog})=> dialog))
         this.yesNoResponses = dialogs.map(({yesNo}) => new SequentialDialog(yesNo))      
@@ -16,9 +18,11 @@ class ConversationDialog extends MultiDialog {
         super.show()
         this.isQuestioning = this.currentDialogIndex() === this.multiDialogs[this.currentMultiDialogCursor].length-1;
         this.hasEnded = false
+        this.hasStarted = true
     }
 
     end(){
+        this.hasStarted = false
         super.hide()
     }
 

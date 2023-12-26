@@ -4,6 +4,8 @@ import Vector from "./Vector"
 interface GameObject {
     getId():string
     getPosition():Vector
+    isVisible():boolean
+    setVisible(visible: boolean): void
     update(delta: number, inputs: {[key:string]: boolean}):void
     draw(engine:Engine):void
     onSceneEnter?(sceneId: string): void

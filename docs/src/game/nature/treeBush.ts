@@ -10,6 +10,7 @@ class TreeBush implements GameObject {
     private dimension: Vector = new Vector(0.05, 0.2, 0.05)
     private scale: number = 1.0
     private angle: number = 0.0
+    private visible: boolean = true
     private geometry: Mesh
     private engine: Engine
 
@@ -29,6 +30,14 @@ class TreeBush implements GameObject {
 
     setPosition(x:number, y:number, z:number): void {
         this.position = new Vector(x, y, z)
+    }
+    
+    isVisible(): boolean {
+        return this.visible
+    }
+
+    setVisible(visible: boolean): void {
+        this.visible = visible
     }
 
     update(){

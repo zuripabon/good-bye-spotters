@@ -46,7 +46,7 @@ abstract class Engine {
     this.texture = Texture.fromImage(this.glContext, texture);
   }
 
-  createPlayer(camera: GameObject, state: {[key:string]: number|string|boolean} ){
+  createPlayer(camera: GameObject, state: {[key:string]: number|string|boolean} = {} ){
     this.gameCamera = camera
     this.gameState = state
   }  
@@ -59,6 +59,11 @@ abstract class Engine {
       return;
     }
     this.gameScenes[useScene] = [gameObject]
+  }  
+  
+  // Only for current scene
+  getGameObjectById(gameObjectId: string):GameObject | undefined {
+    return this.gameObjects.find(gameObject => gameObject.getId() === gameObjectId)
   }
 
   getShadersUniforms() {
@@ -105,6 +110,14 @@ abstract class Engine {
     }
   }
 
+  getState(){
+    return this.gameState
+  }
+
+  setState(state = {}):void {
+    this.gameState = {...this.gameState, ...state}
+  }
+
   drawObject(
     geometry:Mesh, 
     x:number, 
@@ -117,7 +130,7 @@ abstract class Engine {
     ) {
       this.modelView.pushMatrix();
       this.modelView.translate(x, y, z);
-      if(s > 1.0){
+      if(s !== 1.0){
         this.modelView.scale(s, s, s);
       }
       if(a){
@@ -154,10 +167,14 @@ abstract class Engine {
 
           const gameObjects = this.gameObjects
           
-          for (let i=0; i < gameObjects.length; i++) { 
+          for (let i=0; i < gameObjects.length; i++) {
 
             const gameObject = gameObjects[i]
             const gameObjectId = gameObject.getId()
+
+            if(!gameObject.isVisible()){
+              continue;
+            }
 
             gameObject?.update(delta, this.inputs)
 
@@ -227,6 +244,10 @@ abstract class Engine {
       for (let i=0; i < gameObjects.length; i++) { 
 
         const gameObject = gameObjects[i]
+
+        if(!gameObject.isVisible()){
+          continue;
+        }
 
         if(gameObject.onMouseMove){
           gameObject.onMouseMove(e.movementX, e.movementY, this.lastDelta)
@@ -329,6 +350,11 @@ abstract class Engine {
 
     for (let i=0; i < gameObjects.length; i++) { 
       const gameObject = gameObjects[i]
+
+      if(!gameObject.isVisible()){
+        continue;
+      }
+
       gameObject.draw(this)
     }
 

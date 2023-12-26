@@ -1,44 +1,81 @@
+import { NpcTypes } from './npc'
+
 const hintInteractionPlay = (dialog:string) => `${dialog}<br><br><mark>[press space to continue]</mark>`
 const hintInteractionTalk = (dialog:string) => `${dialog}<br><mark>[nod or type y/n]</mark>`
 
-export const npcDialogs = [
-    [   
-        hintInteractionTalk('La vida loca'),
-        "La vida loca",
-        "La vida loca",
-        2 /*RESOUT_YES*/
+export const npcDialogs = {
+
+    [NpcTypes.npc0]: [   
+        { 
+            dialog: [
+                hintInteractionTalk('La vida loca')
+            ],
+            yesNo: [
+                hintInteractionPlay('La vida loca'),
+                hintInteractionPlay('La vida loca')
+            ]
+        }
     ],
-    [   
-        hintInteractionTalk('Do you have kids?'),
-        "Enjoy this paternity leave",
-        "Dont worry ... I'll enjoy the paternity leave for you ...",
-        2 /*RESOUT_BOTH*/
+    [NpcTypes.npc1]: [   
+        { 
+            dialog: [
+                hintInteractionTalk('Do you have kids?')
+            ],
+            yesNo: [
+                hintInteractionPlay('Enjoy this paternity leave'),
+                hintInteractionPlay("Dont worry ... I'll enjoy the paternity leave for you ...")
+            ]
+        }
     ],
-    [   
-        hintInteractionTalk('Do you wanna join the ideation meeting?'),
-        "I have prepared a special workshop for you",
-        "I have prepared a special workshop for you",
-        2 /*RESOUT_BOTH*/
+
+    [NpcTypes.npc2]: [   
+        { 
+            dialog: [
+                hintInteractionTalk('Do you wanna join the ideation meeting?')
+            ],
+            yesNo: [
+                hintInteractionPlay('I have prepared a special workshop for you'),
+                hintInteractionPlay('I have prepared a special workshop for you')
+            ]
+        }
     ],
-    [   
-        hintInteractionTalk('Do you like GA4?'),
-        "Let's change that",
-        "Let's change that",
-        2 /*RESOUT_TURN_NO*/
+
+    [NpcTypes.npc3]: [   
+        { 
+            dialog: [
+                hintInteractionTalk('Do you like GA4?')
+            ],
+            yesNo: [
+                hintInteractionPlay("Let's change that"),
+                hintInteractionPlay("Let's change that")
+            ]
+        }
     ],
-    [   
-        hintInteractionTalk('Have you ever build a microlito?'),
-        "let me create a bc-francesco for you",
-        "let me create a bc-francesco for you",
-        2 /*RESOUT_TURN_YES*/
+
+    [NpcTypes.npc4]: [   
+        { 
+            dialog: [
+                hintInteractionTalk('Have you ever build a microlito?')
+            ],
+            yesNo: [
+                hintInteractionPlay('let me create a bc-francesco for you'),
+                hintInteractionPlay('let me create a bc-francesco for you')
+            ]
+        }
     ],
-    [   
-        hintInteractionTalk("I'm executing the payments script...are you a mushroom !?"),
-        "payments are like wild mushrooms. Eat this one!",
-        "payments are like wild mushrooms. Eat this one!",
-        2 /*RESOUT_TURN_YES*/
-    ]
-]
+
+    [NpcTypes.npc5]: [   
+        { 
+            dialog: [
+                hintInteractionTalk("I'm executing the payments script...are you a mushroom !?")
+            ],
+            yesNo: [
+                hintInteractionPlay('payments are like wild mushrooms. Eat this one!'),
+                hintInteractionPlay('payments are like wild mushrooms. Eat this one!')
+            ]
+        }
+    ], 
+}
 
 export const priestDialog = [   
     { 
