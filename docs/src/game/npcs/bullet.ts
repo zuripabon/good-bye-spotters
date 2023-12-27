@@ -56,6 +56,12 @@ class Bullet implements GameObject {
         this.rotation.z = z !== null ? z : this.rotation.z
     }
 
+    getCollider():[Vector, Vector] {
+        const minBorderBox = this.position.subtract(this.dimension);
+        const maxBorderBox = this.position.add(this.dimension); 
+        return [minBorderBox, maxBorderBox]
+    }
+
     update(delta: number){
 
         const cameraRotationY = (this.engine.getState('cameraRotationY') || 0 ) as number

@@ -109,6 +109,19 @@ export const priestDialog = [
     }
 ]
 
+
+export const gameOverDialog = [   
+    { 
+        dialog: [
+            hintInteractionPlay("This is game over but ..."),
+            hintInteractionTalk("be careful, mosnter are still over there, wanna try again?")
+        ],
+        yesNo: [
+            hintInteractionPlay("Good luck"),
+            hintInteractionPlay("See you later ...")
+        ]
+    }
+]
+
 export const gameEndDialog = "<br>THANK YOU FOR GETTING SO FAR WITH ME AND FOR ALL THE TIME WE SHARED TOGETHER. GOOD AND DIFFICULT MOMENTS ALONG THE WAY.<br> I WISH YOU GOOD AND I WISH YOU BREAK THE LIMIT!<br>BOOKING CLOSED ;)<br>"
 
-export const gameOverDialog = hintInteractionPlay("YOUR BOOKING REQUEST WAS REJECTED BY THE LANDLORD")

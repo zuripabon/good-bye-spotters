@@ -12,6 +12,7 @@ import { enumKeys, rn } from './engine/utils'
 import Npc, { NpcTypes } from './npcs/npc'
 import Shotgun from './npcs/shotgun'
 import Bullet from './npcs/bullet'
+import GameOverNpm from './npcs/gameoverNpc'
 
 class Game extends Engine {
 
@@ -23,18 +24,19 @@ class Game extends Engine {
     private init(){
         this.createPlayer(new Player(this))
 
-        this.setLobbyScene()
-        this.setWorldScene()
+        this.createLobbyScene()
+        this.createWorldScene()
+        // this.createGameOverScene()
 
-        this.setScene('world')
+        this.setScene('lobby')
     } 
     
-    private setLobbyScene(){
+    private createLobbyScene(){
         this.createGameObject(new Church(this), 'lobby')
         this.createGameObject(new Priest(this), 'lobby')
     } 
     
-    private setWorldScene(){
+    private createWorldScene(){
         this.createGameObject(new Skybox(this), 'world')
         this.createGameObject(new Ground(this), 'world')
         this.createGameObject(new Moon(this), 'world')
@@ -72,6 +74,11 @@ class Game extends Engine {
         this.createGameObject(new Shotgun(this), 'world')
         this.createGameObject(new Bullet(this), 'world')
     }
+
+    // private createGameOverScene(){
+    //     this.createGameObject(new Church(this), 'gameover')
+    //     this.createGameObject(new GameOverNpm(this), 'gameover')
+    // } 
 
     static run(gameTexture: HTMLImageElement){
         const game = new Game(gameTexture)

@@ -4,6 +4,9 @@ import Engine from "../engine"
 import GameObject from "../engine/GameObject"
 import { rn } from "../engine/utils"
 
+const MAX_ENEMIES_ALLOWED = 50
+let enemiesCounter = 0;
+
 class Enemy implements GameObject {
 
     private id:string 
@@ -14,14 +17,14 @@ class Enemy implements GameObject {
     private light: number = 1.0
     private factor: number = 0
     private visible: boolean = true
-    private timeToRespawn: number = 0
+    private speed: number = 0.4
     private geometry: Mesh
     private engine:Engine
 
     constructor(glEngine: Engine, id?: string){
-        this.id = id || `enemy${(new Date()).getTime()}`
+        this.id = id || `enemy${++enemiesCounter}`
         this.engine = glEngine
-        this.geometry = Mesh.plane(glEngine.glContext, 32*8, 0, 47*8, 31*8, 0.13, 0.30)
+        this.geometry = Mesh.plane(glEngine.glContext, 0, 31*8,  15*8,  31*17, 0.13, 0.30)
     }
 
     getId():string {
@@ -64,10 +67,35 @@ class Enemy implements GameObject {
         this.visible = visible
     }
 
-    update(){
+    update(delta: number){
 
-        this.position.x += rn(-4.0, 4.0); // re-spawn the poor thing between our path limits
-        this.position.z += rn(-5.0, 5.0); // this is kinda shitty but gives interesting results - sometimes spawns a demon right behind you and it's funny
+        this.rotation.y = Math.atan2( -this.engine.getCamera().getPosition().x - this.position.x, -this.engine.getCamera().getPosition().z - this.position.z ) * ( 180 / Math.PI );
+
+        const sp = delta * this.speed;
+        const cameraPosition = this.engine.getCamera().getPosition()
+
+        if(Math.abs(cameraPosition.z + this.position.z) < 1.0)
+        {
+            if(-cameraPosition.x > this.position.x) {
+                this.position.x += sp;
+            }
+            else {
+                this.position.x -= sp;
+            }
+        }
+
+        if(-cameraPosition.z > this.position.z){
+            this.position.z += sp;
+        }
+        else {
+            this.position.z -= sp;
+        }
+
+        
+        const bullet = this.engine.getGameObjectById('bullet')
+        if(bullet){
+            this.engine.checkCollision(this.id, this, 'bullet', bullet)
+        }
 
     }
 
@@ -88,8 +116,53 @@ class Enemy implements GameObject {
         return [minBorderBox, maxBorderBox]
     }
 
-    onCollideEnter(): void {
-        console.log('colliding', this.id)
+    respawnEnemy() {
+
+        this.visible = false
+
+        const bullet = this.engine.getGameObjectById('bullet')
+        bullet?.setPosition(10000, null, 10000)
+
+        const currentKills = this.engine.getState('kills') as number
+        this.engine.setState('kills', currentKills + 1)
+
+        // enemy killed, we simply respawn it anywhere else and create a new one
+        // so the more enemies killed the more will appear and the speed is increased
+        this.engine.cleanCollision(this.id, 'bullet')
+
+        this.position.x = rn(-1, 1) 
+        this.position.z = rn(-5.0, 5.0)
+        this.speed = rn(0.3, 0.7)
+
+        const random = rn(1,100)
+
+        if(random > 70 && enemiesCounter < MAX_ENEMIES_ALLOWED){
+            const enemy = new Enemy(this.engine)
+            enemy.setPosition(rn(0, 0.5), 0.3, -this.engine.getCamera().getPosition().z + rn(-5.0, 5.0))
+            this.engine.createGameObject(enemy, 'world')
+        }
+
+        this.visible = true
+    }
+
+    gameOver(){
+        console.log('total kills', this.engine.getState('kills'))
+        location.reload();
+        // this.engine.setScene('gameover')
+    }
+
+    onCollideEnter(gameObjectId: string): void {
+        console.log('checking collision?', this.id, gameObjectId)
+
+        if(gameObjectId === 'bullet'){
+            return this.respawnEnemy()
+        }
+
+        if(gameObjectId === 'camera'){
+            return this.gameOver()
+        }
+
+        
     }
 
 }

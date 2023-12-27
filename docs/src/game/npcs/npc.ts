@@ -99,6 +99,7 @@ class Npc implements GameObject {
                 if(this.dialog.isDialogOver()){
                     this.dialog.end()
                     this.engine.setState('enemyMode', true)
+                    this.engine.setState('kills', 0)
                     return;
                 }
             }
@@ -123,7 +124,7 @@ class Npc implements GameObject {
 
             if(this.timeToRespawn > 2.0){
                 const enemy = new Enemy(this.engine)
-                enemy.setPosition(rn(-4.0, 4.0), 0.3, -this.engine.getCamera().getPosition().z + rn(-5.0, 5.0))
+                enemy.setPosition(rn(0, 0.5), 0.3, -this.engine.getCamera().getPosition().z + rn(-5.0, 5.0))
 
                 this.engine.createGameObject(enemy, 'world')
                 this.engine.getGameObjectById('shotgun')?.setVisible(true)

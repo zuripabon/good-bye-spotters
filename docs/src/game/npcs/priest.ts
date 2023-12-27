@@ -7,15 +7,15 @@ import { priestDialog } from "./dialogs"
 
 class Priest implements GameObject {
 
-    private id:string 
-    private position:Vector = new Vector(0, 0.3, 0)
-    private rotation: Vector = new Vector(0, 0, 0)
-    private dimension:Vector = new Vector(0.015, 0.30,  0.05)
-    private scale: number = 1.0
-    private visible: boolean = true
-    private geometry: Mesh
-    private dialog:ConversationDialog
-    private engine:Engine
+    protected id:string 
+    protected position:Vector = new Vector(0, 0.3, 0)
+    protected rotation: Vector = new Vector(0, 0, 0)
+    protected dimension:Vector = new Vector(0.015, 0.30,  0.05)
+    protected scale: number = 1.0
+    protected visible: boolean = true
+    protected geometry: Mesh
+    protected dialog:ConversationDialog
+    protected engine:Engine
 
     constructor(glEngine: Engine, id?: string){
         this.id = id || 'priest'

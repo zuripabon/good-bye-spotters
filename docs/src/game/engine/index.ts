@@ -98,8 +98,9 @@ abstract class Engine {
         this.gameCamera.onSceneLeave(this.currentScene)
       }
       if(this.gameScenes[this.currentScene]){
-        for (let i=0; i < this.gameScenes[this.currentScene].length; i++) { 
-          const currentGameObject = this.gameScenes[this.currentScene][i]
+        const gameObjects = this.gameObjects
+        for (let i=0; i < gameObjects.length; i++) {
+          const currentGameObject = gameObjects[i]
           if(currentGameObject.onSceneLeave){
             currentGameObject.onSceneLeave(this.currentScene)
           }
@@ -111,8 +112,9 @@ abstract class Engine {
       if(this.gameCamera.onSceneEnter){
         this.gameCamera.onSceneEnter(this.currentScene)
       }
-      for (let i=0; i < this.gameScenes[this.currentScene].length; i++) { 
-        const currentGameObject = this.gameScenes[this.currentScene][i]
+      const gameObjects = this.gameObjects
+      for (let i=0; i < gameObjects.length; i++) {
+          const currentGameObject = gameObjects[i]
         if(currentGameObject.onSceneEnter){
           currentGameObject.onSceneEnter(this.currentScene)
         }
@@ -361,9 +363,16 @@ abstract class Engine {
       }
 
     }
-  }  
+  }
   
-  private checkCollision(
+  cleanCollision(gameObjectAId:string, gameObjectBId:string){
+    const abId = `${gameObjectAId}${gameObjectBId}`
+    const baId = `${gameObjectBId}${gameObjectAId}`
+    this.gameObjectCollisions[abId] = false
+    this.gameObjectCollisions[baId] = false
+  }
+  
+  checkCollision(
     gameObjectAId:string, 
     gameObjectA:GameObject, 
     gameObjectBId:string, 
@@ -382,26 +391,26 @@ abstract class Engine {
     
     if(isColliding){
       if(!this.gameObjectCollisions[abId] && gameObjectA.onCollideEnter){
-        gameObjectA.onCollideEnter(gameObjectBId, this.currentScene)
         this.gameObjectCollisions[abId] = true
+        gameObjectA.onCollideEnter(gameObjectBId, this.currentScene)
       } 
 
       if(!this.gameObjectCollisions[baId] && gameObjectB.onCollideEnter){
-        gameObjectB.onCollideEnter(gameObjectAId, this.currentScene)
         this.gameObjectCollisions[baId] = true
+        gameObjectB.onCollideEnter(gameObjectAId, this.currentScene)
       }
 
       return;
     }
 
     if(this.gameObjectCollisions[abId] && gameObjectA.onCollideLeave){
-      gameObjectA.onCollideLeave(gameObjectBId, this.currentScene)
       this.gameObjectCollisions[abId] = false
+      gameObjectA.onCollideLeave(gameObjectBId, this.currentScene)
     }
     
     if(this.gameObjectCollisions[baId] && gameObjectB.onCollideLeave){
-      gameObjectB.onCollideLeave(gameObjectAId, this.currentScene)
       this.gameObjectCollisions[baId] = false
+      gameObjectB.onCollideLeave(gameObjectAId, this.currentScene)
     }
     
   }

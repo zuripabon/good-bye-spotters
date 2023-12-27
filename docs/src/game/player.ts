@@ -82,12 +82,16 @@ class Player extends Camera {
             this.engine.setShadersUniforms(1.0, [0.2, 0.1])
         }
 
+        if(sceneId === 'gameover'){
+            this.engine.setShadersUniforms(1.0, [0.1, 0.7])
+        }
+
         this.position.x = 0.0
         this.position.y = -0.45
         this.position.z = -1.0
         this.rotation.x = 0
         this.rotation.y = 0
-        this.canMove = true
+        this.canMove = sceneId !== 'gameover'
         this.canMoveUp = true
     }
 
