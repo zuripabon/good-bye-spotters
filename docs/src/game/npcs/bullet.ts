@@ -58,7 +58,7 @@ class Bullet implements GameObject {
 
     update(delta: number){
 
-        const cameraRotationY = (this.engine.getState().cameraRotationY || 0 ) as number
+        const cameraRotationY = (this.engine.getState('cameraRotationY') || 0 ) as number
 
         this.position.x += Math.sin(cameraRotationY) * delta * 10.0;// * 0.1;
         this.position.z -= Math.cos(cameraRotationY) * delta * 10.0;// * 0.1;

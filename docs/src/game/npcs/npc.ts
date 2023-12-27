@@ -4,6 +4,8 @@ import Engine from "../engine"
 import GameObject from "../engine/GameObject"
 import ConversationDialog from "../engine/ConversationDialog"
 import { npcDialogs } from "./dialogs"
+import { rn } from "../engine/utils"
+import Enemy from "./enemy"
 
 export enum NpcTypes {
     npc0 = 'npc0',
@@ -31,13 +33,15 @@ class Npc implements GameObject {
     private dimension:Vector = new Vector(0.015, 0.30,  0.05)
     private scale: number = 1.0 
     private light: number = 1.0
+    private factor: number = 0
     private visible: boolean = true
+    private timeToRespawn: number = 0
     private geometry: Mesh
     private dialog:ConversationDialog
     private engine:Engine
 
     constructor(glEngine: Engine, id: NpcTypes){
-        this.id = id || 'Enemy'
+        this.id = id || 'npc'
         this.engine = glEngine
 
         const npcMesh = NPC_MESHES[id]
@@ -86,7 +90,7 @@ class Npc implements GameObject {
         this.visible = visible
     }
 
-    update(_: number, inputs: {[key:string]: boolean} = {}){
+    update(delta: number, inputs: {[key:string]: boolean} = {}){
 
         if(this.dialog.hasStarted){
 
@@ -94,8 +98,7 @@ class Npc implements GameObject {
                 this.dialog.next()
                 if(this.dialog.isDialogOver()){
                     this.dialog.end()
-                    this.engine.getGameObjectById('shotgun')?.setVisible(true)
-                    // this.engine.setScene('lobby')
+                    this.engine.setState('enemyMode', true)
                     return;
                 }
             }
@@ -109,7 +112,30 @@ class Npc implements GameObject {
 
         }
 
-        this.rotation.y = Math.atan2( -this.engine.getCamera().getPosition().x - this.position.x, -this.engine.getCamera().getPosition().z - this.position.z ) * ( 180 / Math.PI );
+        if(this.engine.getState('enemyMode') === true){
+            
+            this.timeToRespawn += delta
+
+            // Move NPC backwards
+            this.position.z -= delta * 0.25
+            // Transform into enemy texture
+            // this.factor = clamp(this.factor + (this.engine.getLastDelta() * 2.0), 0.0, 1.0)
+
+            if(this.timeToRespawn > 2.0){
+                const enemy = new Enemy(this.engine)
+                enemy.setPosition(rn(-4.0, 4.0), 0.3, -this.engine.getCamera().getPosition().z + rn(-5.0, 5.0))
+
+                this.engine.createGameObject(enemy, 'world')
+                this.engine.getGameObjectById('shotgun')?.setVisible(true)
+                this.engine.destroyGameObject(this.id)
+            }
+            
+            // skv[0] = clamp(skv[0] + ut, 0.26, 1.0);
+            // skv[1] = clamp(skv[1] - ut, 0.18, 0.27);
+            // this.engine.setScene('lobby')
+        }
+
+        this.rotation.y = Math.atan2( -this.engine.getCamera().getPosition().x - this.position.x, -this.engine.getCamera().getPosition().z - this.position.z ) * ( 180 / Math.PI )
     }
 
     draw(glEngine: Engine):void { 
@@ -118,7 +144,8 @@ class Npc implements GameObject {
             this.position,
             this.rotation,
             this.scale,
-            this.light
+            this.light,
+            this.factor
         )
     }
 

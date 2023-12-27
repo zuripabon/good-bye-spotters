@@ -68,6 +68,14 @@ abstract class Engine {
     return this.gameObjects.find(gameObject => gameObject.getId() === gameObjectId)
   }
 
+  destroyGameObject(gameObjectId: string):void {
+    const indexToDelete = this.gameObjects.findIndex(gameObject => gameObject.getId() === gameObjectId)
+
+    if(indexToDelete){
+      this.gameObjects.splice(indexToDelete, 1)
+    }
+  }
+
   getShadersUniforms() {
     return this.shaderUniforms
   }
@@ -116,12 +124,19 @@ abstract class Engine {
     return this.totalGameTime
   }
 
-  getState(){
+  getLastDelta(){
+    return this.lastDelta
+  }
+
+  getState(key:string = ''){
+    if(key){
+      return this.gameState[key]
+    }
     return this.gameState
   }
 
-  setState(state = {}):void {
-    this.gameState = {...this.gameState, ...state}
+  setState(key:string, value: string | number | boolean):void {
+    this.gameState[key] = value
   }
 
   drawObject(

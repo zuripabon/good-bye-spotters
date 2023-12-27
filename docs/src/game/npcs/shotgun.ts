@@ -90,9 +90,7 @@ class Shotgun implements GameObject {
         const bullet = this.engine.getGameObjectById('bullet')
         bullet?.setPosition(-camera.getPosition().x, null, -camera.getPosition().z)
         
-        this.engine.setState({ 
-            cameraRotationY : camera.getRotation().y * 3.14 / 180.0
-        })
+        this.engine.setState('cameraRotationY', camera.getRotation().y * 3.14 / 180.0)
         
         bullet?.setVisible(true)
         
