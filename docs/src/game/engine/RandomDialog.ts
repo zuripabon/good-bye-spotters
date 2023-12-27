@@ -13,7 +13,6 @@ class RandomDialog implements Dialog {
     show():void{
         this.currentDialogCursor = ~~rn(0, this.dialogs.length-1)
         const dialog = this.dialogs[this.currentDialogCursor]
-        console.log(this.currentDialogCursor, dialog)
         text(dialog)
     }
 

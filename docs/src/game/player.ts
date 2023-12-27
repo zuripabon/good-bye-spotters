@@ -60,9 +60,23 @@ class Player extends Camera {
         this.position.x += Math.sin(stepRot) * speed;
         this.position.z -= Math.cos(stepRot) * speed;
 
-        // this.canMoveUp = true
-        // this.position.x = clamp(this.position.x, -4.0, 4.0);
-        // this.position.z = clamp(this.position.z, -1.2, 39.8);
+        if((speed != 0.0 || side != 0.0)){  
+            this.engine.sound.playAt('steps', 350)
+        }
+
+        // step 3: limit world plane boundaries 
+        if(this.engine.getScene() === 'lobby'){
+            this.position.x = clamp(this.position.x, -0.8, 0.8)
+            this.position.z = clamp(this.position.z, -0.8, 0.8)
+            return
+        }
+
+        if(this.engine.getScene() === 'world'){
+            this.position.x = clamp(this.position.x, -5.0, 5.0);
+            this.position.z = clamp(this.position.z, -1.2, 10);
+            return
+        }
+
     }
 
     onMouseMove(x:number, y:number, lastDelta: number){

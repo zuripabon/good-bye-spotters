@@ -1,3 +1,4 @@
+/* eslint-disable no-sparse-arrays */
 import Engine from './engine'
 import { VertexShader, FragmentShader } from './shader'
 import Player from './player'
@@ -12,7 +13,7 @@ import { enumKeys, rn } from './engine/utils'
 import Npc, { NpcTypes } from './npcs/npc'
 import Shotgun from './npcs/shotgun'
 import Bullet from './npcs/bullet'
-import GameOverNpm from './npcs/gameoverNpc'
+// import GameOverNpm from './npcs/gameoverNpc'
 
 class Game extends Engine {
 
@@ -27,6 +28,8 @@ class Game extends Engine {
         this.createLobbyScene()
         this.createWorldScene()
         // this.createGameOverScene()
+
+        this.setAudio()
 
         this.setScene('lobby')
     } 
@@ -79,6 +82,12 @@ class Game extends Engine {
     //     this.createGameObject(new Church(this), 'gameover')
     //     this.createGameObject(new GameOverNpm(this), 'gameover')
     // } 
+
+    private setAudio(){
+
+        this.sound.loadSample('steps', [2,0.2,100,.01,.02,.02,,1.9,-7.4,,,,.07,1.5,,,.1,,.08,.47])
+        this.sound.loadSample('shotgun', [,,471,,.09,.47,4,1.06,-6.7,,,,,.9,61,.1,,.82,.09,.13])
+    }
 
     static run(gameTexture: HTMLImageElement){
         const game = new Game(gameTexture)

@@ -6,12 +6,14 @@ import Camera from './Camera'
 import { on, abab } from './utils'
 import ModelView from './ModelView'
 import Vector from './Vector'
+import Sound from './Sound'
 
 // A WEBGL program is a combination shader programs which are dynamically controlled with javascript code
 abstract class Engine {
 
   glContext: WebGLRenderingContext
   modelView: ModelView
+  sound = new Sound()
   
   protected inputs: {[key:string]: boolean} = {}
   protected gameCamera: GameObject = new Camera()

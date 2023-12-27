@@ -95,6 +95,8 @@ class Shotgun implements GameObject {
         bullet?.setVisible(true)
         
         this.light = 1;
+
+        this.engine.sound.play('shotgun')
     }
 
     getCollider():[Vector, Vector] {

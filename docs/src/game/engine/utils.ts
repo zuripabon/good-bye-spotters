@@ -61,11 +61,6 @@ export const ttc = function(color:string){
 };
 
 
-export const clamp = function(a:number,b:number,c:number){
-    return Math.min(Math.max(a, b), c);
-};
-
-
 // aabb vs aabb
 // we assume a and b have two vectors mn (min) and mx (max) which determine their bounding box
 // you need to call update on them (usp) so the min and max are calculated based on their (p)osition +- (d)imensions
@@ -83,3 +78,39 @@ export const abab = function(a: [Vector, Vector], b: [Vector, Vector]){
 export function enumKeys<O extends object, K extends keyof O = keyof O>(obj: O): K[] {
     return Object.keys(obj).filter(k => Number.isNaN(+k)) as K[];
 }
+
+
+export const {max, min, abs, sin, cos, atan2, hypot, PI, sqrt, tan, imul, round, exp, log} = Math;
+
+
+export const PI2 = 2 * PI;
+
+
+export const TO_RAD = PI / 180;
+
+
+export const lerp = (a: number, b: number, t: number): number => (1 - t) * a + t * b;
+
+
+export const lerpLog = (a: number, b: number, t: number): number => exp(lerp(log(a), log(b), t));
+
+
+export const dec1 = (x: number) => (x ? --x : x);
+
+
+export const clamp = (x: number, _min: number, _max: number) => min(_max, max(x, _min));
+
+
+export const sign = (v: number) => (v > 0 ? 1 : -1);
+
+
+export const reach = (t0: number, t1: number, v: number): number => {
+    if (t0 < t1) {
+        return min(t0 + v, t1);
+    } else if (t0 > t1) {
+        return max(t0 - v, t1);
+    }
+    return t0;
+};
+
+export const sqrLength3 = (x: number, y: number, z: number) => x * x + y * y + z * z;

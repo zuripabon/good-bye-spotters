@@ -4,7 +4,7 @@ import Engine from "../engine"
 import GameObject from "../engine/GameObject"
 import ConversationDialog from "../engine/ConversationDialog"
 import { npcDialogs } from "./dialogs"
-import { rn } from "../engine/utils"
+import { clamp, rn } from "../engine/utils"
 import Enemy from "./enemy"
 
 export enum NpcTypes {
@@ -98,8 +98,8 @@ class Npc implements GameObject {
                 this.dialog.next()
                 if(this.dialog.isDialogOver()){
                     this.dialog.end()
-                    this.engine.setState('enemyMode', true)
                     this.engine.setState('kills', 0)
+                    this.engine.setState('enemyMode', true)
                     return;
                 }
             }
@@ -119,8 +119,19 @@ class Npc implements GameObject {
 
             // Move NPC backwards
             this.position.z -= delta * 0.25
+
             // Transform into enemy texture
             // this.factor = clamp(this.factor + (this.engine.getLastDelta() * 2.0), 0.0, 1.0)
+
+            // Turn sky danger zone
+            const { sky } = this.engine.getShadersUniforms()
+            this.engine.setShadersUniforms(
+                1.0, 
+                [
+                    clamp(sky[0] + this.engine.getLastDelta()*2.0, 0.26, 1.0), 
+                    clamp(sky[1] - this.engine.getLastDelta()*2.0, 0.18, 0.27)
+                ]
+            )
 
             if(this.timeToRespawn > 2.0){
                 const enemy = new Enemy(this.engine)
@@ -131,11 +142,9 @@ class Npc implements GameObject {
                 this.engine.destroyGameObject(this.id)
             }
             
-            // skv[0] = clamp(skv[0] + ut, 0.26, 1.0);
-            // skv[1] = clamp(skv[1] - ut, 0.18, 0.27);
-            // this.engine.setScene('lobby')
         }
 
+        // NPC always faces to player
         this.rotation.y = Math.atan2( -this.engine.getCamera().getPosition().x - this.position.x, -this.engine.getCamera().getPosition().z - this.position.z ) * ( 180 / Math.PI )
     }
 
@@ -157,7 +166,6 @@ class Npc implements GameObject {
     }
 
     onCollideEnter(): void {
-        console.log('colliding', this.id)
         this.dialog.start()
     }
 

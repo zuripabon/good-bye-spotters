@@ -2,7 +2,7 @@ import Vector from "../engine/Vector"
 import Mesh from "../engine/Mesh"
 import Engine from "../engine"
 import GameObject from "../engine/GameObject"
-import { rn } from "../engine/utils"
+import {  rn } from "../engine/utils"
 
 const MAX_ENEMIES_ALLOWED = 50
 let enemiesCounter = 0;
@@ -152,7 +152,6 @@ class Enemy implements GameObject {
     }
 
     onCollideEnter(gameObjectId: string): void {
-        console.log('checking collision?', this.id, gameObjectId)
 
         if(gameObjectId === 'bullet'){
             return this.respawnEnemy()
