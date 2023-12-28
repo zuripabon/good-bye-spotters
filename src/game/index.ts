@@ -5,7 +5,6 @@ import Player from './player'
 import Church from './nature/church'
 import Priest from './npcs/priest'
 import Ground from './nature/ground'
-import Moon from './nature/moon'
 import Tree from './nature/tree'
 import TreeBush from './nature/treeBush'
 import Skybox from './nature/skybox'
@@ -47,7 +46,6 @@ class Game extends Engine {
     private createWorldScene(){
         this.createGameObject(new Skybox(this), 'world')
         this.createGameObject(new Ground(this), 'world')
-        this.createGameObject(new Moon(this), 'world')
         
 
         for(let i = 0; i < 30; i++) {

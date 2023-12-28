@@ -55,7 +55,7 @@ class Camera implements GameObject {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    update(delta: number, inputs: {[key:string]: boolean}){
+    update(_: number, _2: {[key:string]: boolean}){
         
     }
 
@@ -71,16 +71,6 @@ class Camera implements GameObject {
         const minBorderBox = position.subtract(this.dimension);
         const maxBorderBox = position.add(this.dimension); 
         return [minBorderBox, maxBorderBox]
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    onCollideEnter(gameObjectId: string, sceneId: string): void {
-        return;
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    onCollideLeave(gameObjectId: string, sceneId: string): void {
-        return;
     }
 
 }

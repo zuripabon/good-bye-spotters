@@ -8,7 +8,6 @@ class TreeBush implements GameObject {
     private id:string 
     private position: Vector = new Vector(0, 0,  0)
     private rotation: Vector = new Vector(0, 0, 0)
-    private dimension: Vector = new Vector(0.05, 0.2, 0.05)
     private scale: number = 1.0
     private visible: boolean = true
     private geometry: Mesh
