@@ -56,6 +56,17 @@
   justify-content: center;
 }
 
+.hint {
+  padding: 20px;
+  position: fixed;
+  bottom: 50px;
+  left: 50px;
+  color: #f6f1f1;
+  font-size: 18px;
+  z-index: 10;
+  animation: hi-there 3s ease infinite;
+}
+
 .landing-p {
   color: rgb(13, 13, 13);
   font-family: Poppins;
@@ -75,6 +86,12 @@
   bottom: 0;
   right: 0;
   padding: 5px;
+  color: black;
+  font-size: 12px;
+}
+
+.footer a {
+  color: black;
 }
 
 .hi-there {

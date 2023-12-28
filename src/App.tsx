@@ -1,6 +1,7 @@
 
 import { useState, useRef } from 'react'
 import Landing from './components/Landing'
+import Hint from './components/Hint'
 import Dialog from './components/Dialog'
 import Footer from './components/Footer'
 import Game from './game'
@@ -11,6 +12,7 @@ import './App.css'
 function App() {
 
   const [isVisible, setVisible] = useState(false);
+  const [isHintVisible, setHintVisible] = useState(false);
   const imageRef = useRef(null)
   
   const handleOnLoadTexture = () => {
@@ -19,10 +21,12 @@ function App() {
 
   const handleOnClick = () => {
     Game.run(imageRef.current as unknown as HTMLImageElement);
+    setHintVisible(true)
   }
 
   return (
     <main>
+      {isHintVisible && <Hint />}
       {isVisible && <Landing onClick={handleOnClick}/>}
       <Dialog/>
       <Footer/>
