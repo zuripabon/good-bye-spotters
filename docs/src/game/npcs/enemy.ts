@@ -2,10 +2,10 @@ import Vector from "../engine/Vector"
 import Mesh from "../engine/Mesh"
 import Engine from "../engine"
 import GameObject from "../engine/GameObject"
-import {  rn } from "../engine/utils"
+import {  clamp, rn } from "../engine/utils"
 
 const MAX_ENEMIES_ALLOWED = 50
-let enemiesCounter = 0;
+export let enemiesCounter = 0;
 
 class Enemy implements GameObject {
 
@@ -17,7 +17,7 @@ class Enemy implements GameObject {
     private light: number = 1.0
     private factor: number = 0
     private visible: boolean = true
-    private speed: number = 0.4
+    private speed: number = 0.5
     private geometry: Mesh
     private engine:Engine
 
@@ -97,6 +97,10 @@ class Enemy implements GameObject {
             this.engine.checkCollision(this.id, this, 'bullet', bullet)
         }
 
+        if(this.engine.getState('enemyMode') === true){
+            this.engine.sound.playAt('drum', 115)
+        }
+
     }
 
     draw(glEngine: Engine):void { 
@@ -132,7 +136,7 @@ class Enemy implements GameObject {
 
         this.position.x = rn(-1, 1) 
         this.position.z = rn(-5.0, 5.0)
-        this.speed = rn(0.3, 0.7)
+        this.speed = clamp(this.speed + rn(-0.3, 0.3), 0.3, 0.5)
 
         const random = rn(1,100)
 
@@ -146,9 +150,9 @@ class Enemy implements GameObject {
     }
 
     gameOver(){
-        console.log('total kills', this.engine.getState('kills'))
-        location.reload();
-        // this.engine.setScene('gameover')
+        this.engine.sound.play('hit')
+        this.engine.setState('enemyMode', false)
+        this.engine.setScene('gameover')
     }
 
     onCollideEnter(gameObjectId: string): void {
@@ -160,7 +164,6 @@ class Enemy implements GameObject {
         if(gameObjectId === 'camera'){
             return this.gameOver()
         }
-
         
     }
 

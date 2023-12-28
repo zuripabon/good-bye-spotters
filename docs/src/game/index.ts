@@ -13,7 +13,7 @@ import { enumKeys, rn } from './engine/utils'
 import Npc, { NpcTypes } from './npcs/npc'
 import Shotgun from './npcs/shotgun'
 import Bullet from './npcs/bullet'
-// import GameOverNpm from './npcs/gameoverNpc'
+import GameOverNpm from './npcs/gameoverNpc'
 
 class Game extends Engine {
 
@@ -27,7 +27,7 @@ class Game extends Engine {
 
         this.createLobbyScene()
         this.createWorldScene()
-        // this.createGameOverScene()
+        this.createGameOverScene()
 
         this.setAudio()
 
@@ -68,9 +68,6 @@ class Game extends Engine {
         for (const npcId of enumKeys(NpcTypes)) {
 
             const npc = new Npc(this, NpcTypes[npcId]);
-            npc.setPosition(rn(0, 0.5), 0.3, -rn(1, 4) - rn(0.0, 0.3))
-            npc.setLight(1.0)
-
             this.createGameObject(npc, 'world')
         }
 
@@ -78,15 +75,19 @@ class Game extends Engine {
         this.createGameObject(new Bullet(this), 'world')
     }
 
-    // private createGameOverScene(){
-    //     this.createGameObject(new Church(this), 'gameover')
-    //     this.createGameObject(new GameOverNpm(this), 'gameover')
-    // } 
+    private createGameOverScene(){
+        this.createGameObject(new Church(this), 'gameover')
+        this.createGameObject(new GameOverNpm(this), 'gameover')
+    } 
 
     private setAudio(){
 
         this.sound.loadSample('steps', [2,0.2,100,.01,.02,.02,,1.9,-7.4,,,,.07,1.5,,,.1,,.08,.47])
         this.sound.loadSample('shotgun', [,,471,,.09,.47,4,1.06,-6.7,,,,,.9,61,.1,,.82,.09,.13])
+        this.sound.loadSample('enterAttackMode', [,,662,.82,.11,.33,1,0,,-0.2,,,,1.2,,.26,.01])
+        this.sound.loadSample('challengeAccepted', [1.27,,5555,.01,.08,.08,4,2.57,,.1,-50,.02,.01,2,-1,,,.37,.08,.01])
+        this.sound.loadSample('hit', [,,528,.01,,.48,,.6,-11.6,,,,.32,4.2])
+        this.sound.loadSample('drum', [2,.8,999,,,,,1.5,,.3,-99,.1,1.63,,,.11,.22])
     }
 
     static run(gameTexture: HTMLImageElement){

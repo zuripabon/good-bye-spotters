@@ -93,7 +93,6 @@ export const priestDialog = [
             hintInteractionTalk("Looks like you were rejected by the landlord ... would you help me again?")
         ],
         yesNo: [
-
             hintInteractionPlay("Do you see my face? I'm forced to smile the whole f***ng day but now I'm truly smiling"),
             hintInteractionPlay("will remember that when AI dominates the real state market...")
         ]
@@ -110,18 +109,19 @@ export const priestDialog = [
 ]
 
 
-export const gameOverDialog = [   
+export const gameOverDialog= (killsPoints:string) => ([   
     { 
         dialog: [
-            hintInteractionPlay("This is game over but ..."),
-            hintInteractionTalk("be careful, mosnter are still over there, wanna try again?")
+            hintInteractionPlay("You were rejected by the landlord ..."),
+            hintInteractionPlay(`you made a total balance of ${killsPoints}0$ which is not enought to pay landlord deposit`),
+            hintInteractionTalk("Want to try it again?")
         ],
         yesNo: [
             hintInteractionPlay("Good luck"),
-            hintInteractionPlay("See you later ...")
+            hintInteractionPlay("Good luck")
         ]
     }
-]
+])
 
 export const gameEndDialog = "<br>THANK YOU FOR GETTING SO FAR WITH ME AND FOR ALL THE TIME WE SHARED TOGETHER. GOOD AND DIFFICULT MOMENTS ALONG THE WAY.<br> I WISH YOU GOOD AND I WISH YOU BREAK THE LIMIT!<br>BOOKING CLOSED ;)<br>"
 

@@ -14,14 +14,14 @@ class Priest implements GameObject {
     protected scale: number = 1.0
     protected visible: boolean = true
     protected geometry: Mesh
-    protected dialog:ConversationDialog
+    protected dialog:ConversationDialog | undefined
     protected engine:Engine
 
     constructor(glEngine: Engine, id?: string){
         this.id = id || 'priest'
         this.engine = glEngine
         this.geometry = Mesh.plane(this.engine.glContext, 512, 0, 640, 254, 0.13, 0.30)
-        this.dialog = new ConversationDialog(priestDialog)
+        this.setDialog()
     }
 
     getId():string {
@@ -56,27 +56,16 @@ class Priest implements GameObject {
         this.visible = visible
     }
 
-    update(_: number, inputs: {[key:string]: boolean} = {}){
+    setDialog(dialog = priestDialog, storageKey = 'priestDialog'){
+        this.dialog = new ConversationDialog(dialog, storageKey)
+        this.dialog.onEnd(() => {
+            this.engine.setScene('world')
+            this.engine.sound.play('challengeAccepted')
+            return null
+        })
+    } 
 
-        if(this.dialog.hasStarted){
-
-            if(inputs.Space){
-                this.dialog.next()
-                if(this.dialog.isDialogOver()){
-                    this.dialog.end()
-                    this.engine.setScene('world')
-                    return;
-                }
-            }
-
-            if(inputs.KeyY){
-                this.dialog.yes()
-            }
-
-            if(inputs.KeyN){
-                this.dialog.no()
-            }
-        }
+    update(){
 
         this.rotation.y = Math.atan2( -this.engine.getCamera().getPosition().x - this.position.x, -this.engine.getCamera().getPosition().z - this.position.z ) * ( 180 / Math.PI );
     }
@@ -96,12 +85,10 @@ class Priest implements GameObject {
         return [minBorderBox, maxBorderBox]
     }
 
-    onCollideEnter(): void {
-        this.dialog.start()
-    }
-
-    onCollideLeave(): void {
-        this.dialog.end()
+    onCollideEnter(gameObjectId: string): void {
+        if(gameObjectId === 'camera'){
+            this.dialog?.start()
+        }
     }
 }
 

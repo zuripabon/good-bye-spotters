@@ -65,16 +65,17 @@ abstract class Engine {
     this.gameScenes[useScene] = [gameObject]
   }  
   
-  // Only for current scene
-  getGameObjectById(gameObjectId: string):GameObject | undefined {
-    return this.gameObjects.find(gameObject => gameObject.getId() === gameObjectId)
+  getGameObjectById(gameObjectId: string, sceneId?: string):GameObject | undefined {
+    const gameObjects = sceneId ? this.gameScenes[sceneId] : this.gameObjects
+    return gameObjects.find(gameObject => gameObject.getId() === gameObjectId)
   }
 
-  destroyGameObject(gameObjectId: string):void {
-    const indexToDelete = this.gameObjects.findIndex(gameObject => gameObject.getId() === gameObjectId)
+  destroyGameObject(gameObjectId: string, sceneId?: string):void {
+    const gameObjects = sceneId ? this.gameScenes[sceneId] : this.gameObjects
+    const indexToDelete = gameObjects.findIndex(gameObject => gameObject.getId() === gameObjectId)
 
-    if(indexToDelete){
-      this.gameObjects.splice(indexToDelete, 1)
+    if(indexToDelete > -1){
+      gameObjects.splice(indexToDelete, 1)
     }
   }
 
@@ -116,7 +117,7 @@ abstract class Engine {
       }
       const gameObjects = this.gameObjects
       for (let i=0; i < gameObjects.length; i++) {
-          const currentGameObject = gameObjects[i]
+        const currentGameObject = gameObjects[i]
         if(currentGameObject.onSceneEnter){
           currentGameObject.onSceneEnter(this.currentScene)
         }

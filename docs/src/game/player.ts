@@ -77,6 +77,7 @@ class Player extends Camera {
             return
         }
 
+
     }
 
     onMouseMove(x:number, y:number, lastDelta: number){
@@ -90,10 +91,11 @@ class Player extends Camera {
 
         if(sceneId === 'lobby'){
             this.engine.setShadersUniforms(1.0, [0.0, 0.0])
+            this.engine.sound.play('drum')
         }
 
         if(sceneId === 'world'){
-            this.engine.setShadersUniforms(1.0, [0.2, 0.1])
+            this.engine.setShadersUniforms(1.0, [1, 1])
         }
 
         if(sceneId === 'gameover'){

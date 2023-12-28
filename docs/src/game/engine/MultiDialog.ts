@@ -2,9 +2,9 @@ import SequentialDialog from "./SequentialDialog"
 
 const LOCAL_STORAGE_KEY = 'dialog'
 
-const fetchDialogIndex = (startIndex:number, maxIndex:number):number => {
+const fetchDialogIndex = (startIndex:number, maxIndex:number, storageKey:string):number => {
     try {
-        const localStorageIndex = parseInt(localStorage.getItem(LOCAL_STORAGE_KEY) || "0", 10)
+        const localStorageIndex = parseInt(localStorage.getItem(storageKey) || "0", 10)
         return localStorageIndex > maxIndex ? maxIndex : localStorageIndex 
     }
     catch(error){
@@ -16,13 +16,16 @@ class MultiDialog extends SequentialDialog {
 
     protected multiDialogs: string[][] = []
     protected currentMultiDialogCursor: number = 0
+    protected localStorageKey: string
 
-    constructor(dialogs: string[][], startIndex:number = 0) {
-        const currentMultiDialogCursor = fetchDialogIndex(startIndex, dialogs.length - 1)
+    constructor(dialogs: string[][], startIndex:number = 0, localStorageKey:string = '') {
+        const storageKey = localStorageKey || LOCAL_STORAGE_KEY
+        const currentMultiDialogCursor = fetchDialogIndex(startIndex, dialogs.length - 1, storageKey)
         const currentDialogs = dialogs[currentMultiDialogCursor]
         super(currentDialogs)
         this.multiDialogs = dialogs
         this.currentMultiDialogCursor = currentMultiDialogCursor
+        this.localStorageKey = storageKey
     }
 
     show(): void {
@@ -33,7 +36,7 @@ class MultiDialog extends SequentialDialog {
             if(nextMultiDialogIndex > this.multiDialogs.length-1){
                 nextMultiDialogIndex = this.multiDialogs.length-1
             }
-            localStorage.setItem(LOCAL_STORAGE_KEY, String(nextMultiDialogIndex))
+            localStorage.setItem(this.localStorageKey, String(nextMultiDialogIndex))
         }
     }
 

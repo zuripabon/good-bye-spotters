@@ -20,16 +20,16 @@ class SequentialDialog implements Dialog {
         this.currentDialogCursor = 0
     }
 
+    currentDialogIndex(): number {
+        return this.currentDialogCursor
+    }
+
     next() {
         this.currentDialogCursor++
         if(this.currentDialogCursor >= this.dialogs.length){
             this.currentDialogCursor = this.dialogs.length - 1
         }
         this.show()
-    }
-
-    currentDialogIndex(): number {
-        return this.currentDialogCursor
     }
 }
 

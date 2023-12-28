@@ -2,6 +2,7 @@ import Vector from "../engine/Vector"
 import Mesh from "../engine/Mesh"
 import Engine from "../engine"
 import GameObject from "../engine/GameObject"
+import { clamp } from "../engine/utils"
 
 class Skybox implements GameObject {
 
@@ -55,6 +56,20 @@ class Skybox implements GameObject {
     update(){
         this.position.x = -this.engine.getCamera().getPosition().x
         this.position.z = -this.engine.getCamera().getPosition().z
+
+        // Turn sky danger zone
+        if(this.engine.getState('enemyMode') === true){
+            const { sky } = this.engine.getShadersUniforms()
+            const sky0 = sky[0] + 0.1
+            const sky1 = sky[1] - 0.1
+            this.engine.setShadersUniforms(
+                1.0, 
+                [
+                    clamp(sky0 > 1 ? 0.26 : sky0, 0.26, 1.0), 
+                    clamp(sky1 > 0.27 ? 0.18 : sky1, 0.18, 0.27)
+                ]
+            )
+        }
     }
 
     draw(glEngine: Engine):void { 

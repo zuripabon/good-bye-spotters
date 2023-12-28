@@ -4,7 +4,7 @@ import Engine from "../engine"
 import GameObject from "../engine/GameObject"
 import ConversationDialog from "../engine/ConversationDialog"
 import { npcDialogs } from "./dialogs"
-import { clamp, rn } from "../engine/utils"
+import { rn } from "../engine/utils"
 import Enemy from "./enemy"
 
 export enum NpcTypes {
@@ -48,6 +48,12 @@ class Npc implements GameObject {
         this.geometry = Mesh.plane(glEngine.glContext, npcMesh[0], npcMesh[1], npcMesh[2], npcMesh[3], npcMesh[4], npcMesh[5])
 
         this.dialog = new ConversationDialog(npcDialogs[id])
+        this.dialog.onEnd(() => {
+            this.engine.setState('kills', 0)
+            this.engine.setState('enemyMode', true)
+            this.engine.sound.play('enterAttackMode')
+            return null
+        })
     }
 
     getId():string {
@@ -90,28 +96,7 @@ class Npc implements GameObject {
         this.visible = visible
     }
 
-    update(delta: number, inputs: {[key:string]: boolean} = {}){
-
-        if(this.dialog.hasStarted){
-
-            if(inputs.Space){
-                this.dialog.next()
-                if(this.dialog.isDialogOver()){
-                    this.dialog.end()
-                    this.engine.setState('kills', 0)
-                    this.engine.setState('enemyMode', true)
-                    return;
-                }
-            }
-
-            if(inputs.KeyY){
-                this.dialog.yes()
-            }
-            if(inputs.KeyN){
-                this.dialog.no()
-            }
-
-        }
+    update(delta: number){
 
         if(this.engine.getState('enemyMode') === true){
             
@@ -123,23 +108,13 @@ class Npc implements GameObject {
             // Transform into enemy texture
             // this.factor = clamp(this.factor + (this.engine.getLastDelta() * 2.0), 0.0, 1.0)
 
-            // Turn sky danger zone
-            const { sky } = this.engine.getShadersUniforms()
-            this.engine.setShadersUniforms(
-                1.0, 
-                [
-                    clamp(sky[0] + this.engine.getLastDelta()*2.0, 0.26, 1.0), 
-                    clamp(sky[1] - this.engine.getLastDelta()*2.0, 0.18, 0.27)
-                ]
-            )
-
             if(this.timeToRespawn > 2.0){
                 const enemy = new Enemy(this.engine)
                 enemy.setPosition(rn(0, 0.5), 0.3, -this.engine.getCamera().getPosition().z + rn(-5.0, 5.0))
 
                 this.engine.createGameObject(enemy, 'world')
                 this.engine.getGameObjectById('shotgun')?.setVisible(true)
-                this.engine.destroyGameObject(this.id)
+                this.visible = false
             }
             
         }
@@ -163,6 +138,17 @@ class Npc implements GameObject {
         const minBorderBox = this.position.subtract(this.dimension);
         const maxBorderBox = this.position.add(this.dimension); 
         return [minBorderBox, maxBorderBox]
+    }
+
+    onSceneEnter(sceneId: string): void {
+        if(sceneId !== 'world'){
+            return
+        }
+
+        this.setPosition(rn(0, 0.5), 0.3, -rn(1, 4) - rn(0.0, 0.3))
+        this.setLight(1.0)
+        this.timeToRespawn = 0
+        this.visible = true
     }
 
     onCollideEnter(): void {
