@@ -90,7 +90,7 @@ class Player extends Camera {
     onSceneEnter(sceneId: string): void {
 
         if(sceneId === 'lobby'){
-            this.engine.setShadersUniforms(1.0, [0.0, 0.0])
+            this.engine.setShadersUniforms(1.0, [1, 1])
         }
 
         if(sceneId === 'world'){
@@ -98,7 +98,7 @@ class Player extends Camera {
         }
 
         if(sceneId === 'gameover'){
-            this.engine.setShadersUniforms(1.0, [0.1, 0.7])
+            this.engine.setShadersUniforms(1.0, [1, 0.27])
         }
         
         if(sceneId === 'finish'){
