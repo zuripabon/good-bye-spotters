@@ -1,5 +1,5 @@
 import {audioContext} from "./context.js";
-import {abs, clamp, cos, PI2, round, sign, sin, tan} from "../utils";
+import {abs, clamp, cos, PI2, round, sign, sin, tan} from "../utils.js";
 
 export const zzfx = (code: number[]): AudioBuffer => zzfxG(...code);
 

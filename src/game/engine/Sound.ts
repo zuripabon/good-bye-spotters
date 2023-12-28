@@ -1,4 +1,4 @@
-import { zzfx } from './audio/zzfx'
+import { zzfx } from './audio/zzfx.js'
 import {audioContext} from "./audio/context.js";
 
 class Sound {
