@@ -1,10 +1,10 @@
 import MultiDialog from "./MultiDialog"
-import SequentialDialog from "./SequentialDialog"
+import BaseDialog from "./BaseDialog"
 
 class ConversationDialog extends MultiDialog {
 
     private isQuestioning: boolean = false
-    private yesNoResponses: SequentialDialog[] = []
+    private yesNoResponses: BaseDialog[] = []
     private nextKey:string 
     private yesKey:string 
     private noKey:string
@@ -25,7 +25,7 @@ class ConversationDialog extends MultiDialog {
         this.yesKey = yesKey 
         this.noKey = noKey
         this.endCallback = () => null
-        this.yesNoResponses = dialogs.map(({yesNo}) => new SequentialDialog(yesNo))  
+        this.yesNoResponses = dialogs.map(({yesNo}) => new BaseDialog(yesNo))  
 
     }
     

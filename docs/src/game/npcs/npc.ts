@@ -145,7 +145,7 @@ class Npc implements GameObject {
             return
         }
 
-        this.setPosition(rn(0, 0.5), 0.3, -rn(1, 4) - rn(0.0, 0.3))
+        this.setPosition(rn(0, 1), 0.3, -rn(1, 4) - rn(0.0, 0.3))
         this.setLight(1.0)
         this.timeToRespawn = 0
         this.visible = true

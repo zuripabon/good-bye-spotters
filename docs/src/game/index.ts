@@ -14,6 +14,7 @@ import Npc, { NpcTypes } from './npcs/npc'
 import Shotgun from './npcs/shotgun'
 import Bullet from './npcs/bullet'
 import GameOverNpm from './npcs/gameoverNpc'
+import Win from './npcs/win'
 
 class Game extends Engine {
 
@@ -28,10 +29,14 @@ class Game extends Engine {
         this.createLobbyScene()
         this.createWorldScene()
         this.createGameOverScene()
+        this.createFinishScene()
 
         this.setAudio()
 
-        this.setScene('lobby')
+        const hasFinish = localStorage.getItem('finish') === 'true'
+        this.setScene(hasFinish ? 'finish' : 'lobby')
+
+        this.sound.play('drum')
     } 
     
     private createLobbyScene(){
@@ -78,6 +83,12 @@ class Game extends Engine {
     private createGameOverScene(){
         this.createGameObject(new Church(this), 'gameover')
         this.createGameObject(new GameOverNpm(this), 'gameover')
+    } 
+
+    private createFinishScene(){
+        this.createGameObject(new Skybox(this), 'finish')
+        this.createGameObject(new Church(this), 'finish')
+        this.createGameObject(new Win(this), 'finish')
     } 
 
     private setAudio(){

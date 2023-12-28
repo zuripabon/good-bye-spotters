@@ -1,35 +1,65 @@
-import Dialog from "./Dialog"
-import { text } from "./utils"
+import BaseDialog from "./BaseDialog"
 
-class SequentialDialog implements Dialog {
+class SequentialDialog extends BaseDialog {
 
-    private dialogs: string[]
-    private currentDialogCursor: number = 0
+    private nextKey:string 
+    private endCallback: () => null
+    
+    hasEnded: boolean = false
+    hasStarted: boolean = false
 
-    constructor(dialogs: string[]) {
-        this.dialogs = dialogs       
-    }
-
-    show():void {
-        const dialog = this.dialogs[this.currentDialogCursor]
-        text(dialog)
+    constructor(
+        dialogs: string[], 
+        nextKey:string = 'Space',
+        ) {
+        super(dialogs)
+        this.nextKey = nextKey
+        this.endCallback = () => null
     }
     
-    hide() {
-        text("")
-        this.currentDialogCursor = 0
+    start(startIndex: number = 0){
+        super.reset(startIndex)
+        super.show()
+        this.hasEnded = false
+        this.hasStarted = true
+        document.addEventListener('keypress', this.addEventListener.bind(this));   
     }
 
-    currentDialogIndex(): number {
-        return this.currentDialogCursor
-    }
+    end(runCallback = false){
 
-    next() {
-        this.currentDialogCursor++
-        if(this.currentDialogCursor >= this.dialogs.length){
-            this.currentDialogCursor = this.dialogs.length - 1
+        super.hide()
+        this.hasStarted = false
+        document.removeEventListener('keypress', this.addEventListener.bind(this))
+        if(runCallback){
+            this.endCallback()
         }
-        this.show()
+    }
+
+    next(){
+        super.next();
+        this.hasEnded = this.currentDialogCursor === this.dialogs.length -1
+    }
+
+    onEnd(fn: () => null){
+        this.endCallback = fn
+    }
+
+    private addEventListener(e:KeyboardEvent){
+        if (e.altKey || e.ctrlKey || e.metaKey) {
+            return
+        }
+
+        if(!this.hasStarted){
+            return;
+        }
+
+        if(e.code === this.nextKey){
+            return this.hasEnded ? this.end(true) : this.next()
+        }
+    }
+
+    protected isDialogOver(){
+        return this.hasEnded
     }
 }
 

@@ -1,11 +1,12 @@
 import { NpcTypes } from './npc'
 
-const hintInteractionPlay = (dialog:string) => `${dialog}<br><br><mark>[press space to continue]</mark>`
-const hintInteractionTalk = (dialog:string) => `${dialog}<br><mark>[nod or type y/n]</mark>`
+const hintNoInteraction = (dialog:string) => `<br>${dialog}<br><br>`
+const hintInteractionPlay = (dialog:string) => `<br>${dialog}<br><br><mark>[press space to continue]</mark><br>`
+const hintInteractionTalk = (dialog:string) => `<br>${dialog}<br><br><mark>[nod or type y/n]</mark><br>`
 
 export const npcDialogs = {
 
-    [NpcTypes.npc0]: [   
+    [NpcTypes.npc2]: [   
         { 
             dialog: [
                 hintInteractionTalk('La vida loca')
@@ -16,7 +17,7 @@ export const npcDialogs = {
             ]
         }
     ],
-    [NpcTypes.npc1]: [   
+    [NpcTypes.npc4]: [   
         { 
             dialog: [
                 hintInteractionTalk('Do you have kids?')
@@ -28,7 +29,7 @@ export const npcDialogs = {
         }
     ],
 
-    [NpcTypes.npc2]: [   
+    [NpcTypes.npc1]: [   
         { 
             dialog: [
                 hintInteractionTalk('Do you wanna join the ideation meeting?')
@@ -40,7 +41,7 @@ export const npcDialogs = {
         }
     ],
 
-    [NpcTypes.npc3]: [   
+    [NpcTypes.npc5]: [   
         { 
             dialog: [
                 hintInteractionTalk('Do you like GA4?')
@@ -52,7 +53,7 @@ export const npcDialogs = {
         }
     ],
 
-    [NpcTypes.npc4]: [   
+    [NpcTypes.npc3]: [   
         { 
             dialog: [
                 hintInteractionTalk('Have you ever build a microlito?')
@@ -64,7 +65,7 @@ export const npcDialogs = {
         }
     ],
 
-    [NpcTypes.npc5]: [   
+    [NpcTypes.npc0]: [   
         { 
             dialog: [
                 hintInteractionTalk("I'm executing the payments script...are you a mushroom !?")
@@ -123,5 +124,8 @@ export const gameOverDialog= (killsPoints:string) => ([
     }
 ])
 
-export const gameEndDialog = "<br>THANK YOU FOR GETTING SO FAR WITH ME AND FOR ALL THE TIME WE SHARED TOGETHER. GOOD AND DIFFICULT MOMENTS ALONG THE WAY.<br> I WISH YOU GOOD AND I WISH YOU BREAK THE LIMIT!<br>BOOKING CLOSED ;)<br>"
-
+export const winDialog = [
+            hintInteractionPlay("THANK YOU FOR GETTING SO FAR WITH ME AND FOR ALL THE TIME WE SHARED TOGETHER ..."),
+            hintInteractionPlay("GOOD AND DIFFICULT MOMENTS ALONG THE WAY ..."),
+            hintNoInteraction("I WISH YOU GOOD AND I WISH YOU BREAK THE LIMIT!")
+]

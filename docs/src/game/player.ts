@@ -91,7 +91,6 @@ class Player extends Camera {
 
         if(sceneId === 'lobby'){
             this.engine.setShadersUniforms(1.0, [0.0, 0.0])
-            this.engine.sound.play('drum')
         }
 
         if(sceneId === 'world'){
@@ -101,13 +100,17 @@ class Player extends Camera {
         if(sceneId === 'gameover'){
             this.engine.setShadersUniforms(1.0, [0.1, 0.7])
         }
+        
+        if(sceneId === 'finish'){
+            this.engine.setShadersUniforms(1.0, [0.5, 0.5])
+        }
 
         this.position.x = 0.0
         this.position.y = -0.45
-        this.position.z = -1.0
+        this.position.z = -0.9
         this.rotation.x = 0
         this.rotation.y = 0
-        this.canMove = sceneId !== 'gameover'
+        this.canMove = sceneId === 'lobby' || sceneId === 'world'
         this.canMoveUp = true
     }
 

@@ -1,4 +1,4 @@
-import SequentialDialog from "./SequentialDialog"
+import BaseDialog from "./BaseDialog"
 
 const LOCAL_STORAGE_KEY = 'dialog'
 
@@ -12,7 +12,7 @@ const fetchDialogIndex = (startIndex:number, maxIndex:number, storageKey:string)
     }
 }
 
-class MultiDialog extends SequentialDialog {
+class MultiDialog extends BaseDialog {
 
     protected multiDialogs: string[][] = []
     protected currentMultiDialogCursor: number = 0

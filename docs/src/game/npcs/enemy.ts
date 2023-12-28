@@ -5,6 +5,8 @@ import GameObject from "../engine/GameObject"
 import {  clamp, rn } from "../engine/utils"
 
 const MAX_ENEMIES_ALLOWED = 50
+const KILLS_TO_WIN = 50
+
 export let enemiesCounter = 0;
 
 class Enemy implements GameObject {
@@ -127,8 +129,13 @@ class Enemy implements GameObject {
         const bullet = this.engine.getGameObjectById('bullet')
         bullet?.setPosition(10000, null, 10000)
 
-        const currentKills = this.engine.getState('kills') as number
-        this.engine.setState('kills', currentKills + 1)
+        const kills = (this.engine.getState('kills') as number) + 1
+        this.engine.setState('kills', kills)
+
+        if(kills >= KILLS_TO_WIN){
+            return this.engine.setScene('finish')
+        }
+
 
         // enemy killed, we simply respawn it anywhere else and create a new one
         // so the more enemies killed the more will appear and the speed is increased
