@@ -242,7 +242,7 @@ abstract class Engine {
       
       this.modelView.setProjectionMode()
       this.modelView.loadIdentity();
-      this.modelView.perspective(90 /*45*/, this.canvas.width / this.canvas.height,  0.01,  1000);
+      this.modelView.perspective(90, this.canvas.width / this.canvas.height,  0.01,  1000);
       this.modelView.setModelviewMode()
       
       this.render();

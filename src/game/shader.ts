@@ -1,16 +1,17 @@
 export const VertexShader = `
+
 varying vec2 coord;
 varying vec4 pos;
+
 void main() {
-    coord = gl_TexCoord.xy;
-    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+    coord = LIGHTGLgl_TexCoord.xy;
+    gl_Position = LIGHTGLgl_ModelViewProjectionMatrix * LIGHTGLgl_Vertex;
     pos = gl_Position;
 }
 `
 
 export const FragmentShader = `
 
-// uniforms
 uniform sampler2D texture;
 uniform float factor;
 uniform float over;

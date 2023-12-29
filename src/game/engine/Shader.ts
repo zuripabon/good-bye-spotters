@@ -38,26 +38,6 @@ function regexMap(regex:RegExp, text:string, callback: (result:RegExpExecArray|s
     }
   }
 
-// The `gl_` prefix must be substituted for something else to avoid compile
-// errors, since it's a reserved prefix. This prefixes all reserved names with
-// `_`. The header is inserted after any extensions, since those must come
-// first.
-function fix(header:string, source:string) {
-    const replaced:{[key:string]:boolean} = {};
-    const match = /^((\s*\/\/.*\n|\s*#extension.*\n)+)[^]*$/.exec(source);
-    source = match ? match[1] + header + source.substr(match[1].length) : header + source;
-    regexMap(/\bgl_\w+\b/g, header, function(result) {
-      const r = result as string
-      if (!(replaced[r])) {
-        source = source.replace(new RegExp('\\b' + r + '\\b', 'g'), LIGHTGL_PREFIX + r);
-        replaced[r] = true;
-      }
-    });
-    return source;
-  }
-
-
-  // Compile and link errors are thrown as strings.
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function isArray(obj: any) {
@@ -71,57 +51,27 @@ function fix(header:string, source:string) {
     return str == '[object Number]' || str == '[object Boolean]';
   }
   
-        /*
-// ORIGINAL HEADERS
-  var header = '\
-    uniform mat3 gl_NormalMatrix;\
-    uniform mat4 gl_ModelViewMatrix;\
-    uniform mat4 gl_ProjectionMatrix;\
-    uniform mat4 gl_ModelViewProjectionMatrix;\
-    uniform mat4 gl_ModelViewMatrixInverse;\
-    uniform mat4 gl_ProjectionMatrixInverse;\
-    uniform mat4 gl_ModelViewProjectionMatrixInverse;\
-  ';
-  var vertexHeader = header + '\
-    attribute vec4 gl_Vertex;\
-    attribute vec4 gl_TexCoord;\
-    attribute vec3 gl_Normal;\
-    attribute vec4 gl_Color;\
-    vec4 ftransform() {\
-      return gl_ModelViewProjectionMatrix * gl_Vertex;\
-    }\
-  ';
-*/
 
+const vertexHeader = `
+// Start - This is automatically injected by engine
+uniform mat4 LIGHTGLgl_ModelViewProjectionMatrix;
+attribute vec4 LIGHTGLgl_Vertex;
+attribute vec4 LIGHTGLgl_TexCoord;
+attribute vec3 LIGHTGLgl_Normal;
+attribute vec4 LIGHTGLgl_Color;
+// End - This is automatically injected by engine
 
-  // Headers are prepended to the sources to provide some automatic functionality.
-  // bring them back if we need them
-  //     uniform mat3 gl_NormalMatrix;\
-//    uniform mat4 gl_ModelViewMatrix;\
-//    uniform mat4 gl_ProjectionMatrix;\
+`;
 
+const fragmentHeader = `
+// Start - This is automatically injected by engine
+precision highp float;
+uniform mat4 LIGHTGLgl_ModelViewProjectionMatrix;
+// End - This is automatically injected by engine
 
+`;
 
-// BRING BACK NORMAL and color IF WE NEED Them 
-//attribute vec3 gl_Normal;\
-//attribute vec4 gl_Color;\
-//
-// and we don't need ftransform because we do it anyways
-//
-//    vec4 ftransform() {\
-//    return gl_ModelViewProjectionMatrix * gl_Vertex;\
-//    }\  
-
-const header = '\
-uniform mat4 gl_ModelViewProjectionMatrix;\
-';
-const vertexHeader = header + '\
-  attribute vec4 gl_Vertex;\
-  attribute vec4 gl_TexCoord;\
-';
-const fragmentHeader = '\
-  precision highp float;\
-' + header;
+const builtInUniforms = ['gl_ModelViewProjectionMatrix']
   // Non-standard names beginning with `gl_` must be mangled because they will
 // otherwise cause a compiler error.
 const LIGHTGL_PREFIX = 'LIGHTGL';
@@ -138,36 +88,29 @@ class Shader {
 
 
     constructor(engine: Engine, vertexSource: string, fragmentSource:string){
+      
       this.context = engine.glContext
       this.modelView = engine.modelView
 
+      // Inject automatic headers
+      vertexSource = `${vertexHeader}${vertexSource}`
+      fragmentSource = `${fragmentHeader}${fragmentSource}`
 
       // Check for the use of built-in matrices that require expensive matrix
       // multiplications to compute, and record these in `usedMatrices`.
       const source = vertexSource + fragmentSource;
       const usedMatrices: { [key: string]: string } = {};
 
-      regexMap(/\b(gl_[^;]*)\b;/g, header, function(groups) {
-          const name = groups[1];
-          console.log(groups)
-          if (source.indexOf(name) !== -1) {
-              const capitalLetters = name.replace(/[a-z_]/g, '');
-              usedMatrices[capitalLetters] = LIGHTGL_PREFIX + name;
-          }
-      });
+      builtInUniforms.map(builtInUniform => {
+        if (source.indexOf(builtInUniform) !== -1) {
+          const capitalLetters = builtInUniform.replace(/[a-z_]/g, '');
+          usedMatrices[capitalLetters] = LIGHTGL_PREFIX + builtInUniform;
+        }
+      })
 
       console.log(usedMatrices, 111234)
 
-      if (source.indexOf('ftransform') !== -1) usedMatrices['MVPM'] = LIGHTGL_PREFIX + 'gl_ModelViewProjectionMatrix';
       this.usedMatrices = usedMatrices;
-
-      console.log(vertexSource)
-      vertexSource = fix(vertexHeader, vertexSource);
-      console.log(vertexSource)
-      console.log(fragmentSource)
-      fragmentSource = fix(fragmentHeader, fragmentSource);
-      console.log(fragmentSource)
-
 
       const program = this.context.createProgram();
 
