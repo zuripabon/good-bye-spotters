@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Vector from './Vector'
 import Matrix from './Matrix'
 import Mesh from './Mesh';
@@ -26,14 +27,6 @@ import ModelView from './ModelView';
 //     shader.uniforms({
 //       color: [1, 0, 0, 1]
 //     }).draw(mesh);
-
-function followScriptTagById(id:string) {
-    const element = document.getElementById(id);
-    if(element && element.textContent){
-        return element.textContent
-    }
-    return id;
-}
 
 function regexMap(regex:RegExp, text:string, callback: (result:RegExpExecArray|string) => void) {
     let result = null;
@@ -138,79 +131,79 @@ class Shader {
     private context: WebGLRenderingContext;
     private program: WebGLProgram;
     private uniformLocations: { [key: string]: WebGLUniformLocation } = {}
-    private attributes: { [key: string]: number } = {};
-    private isSampler: { [key: string]: number } = {}
+    private attributesLocation: { [key: string]: number } = {};
+    private uniformSamplers: { [key: string]: number } = {}
     private usedMatrices: { [key: string]: string } = {}
     private modelView: ModelView
 
 
     constructor(engine: Engine, vertexSource: string, fragmentSource:string){
-        this.context = engine.glContext
-        this.modelView = engine.modelView
-        vertexSource = followScriptTagById(vertexSource);
-        fragmentSource = followScriptTagById(fragmentSource);
+      this.context = engine.glContext
+      this.modelView = engine.modelView
 
 
-        // Check for the use of built-in matrices that require expensive matrix
-        // multiplications to compute, and record these in `usedMatrices`.
-        const source = vertexSource + fragmentSource;
-        const usedMatrices: { [key: string]: string } = {};
+      // Check for the use of built-in matrices that require expensive matrix
+      // multiplications to compute, and record these in `usedMatrices`.
+      const source = vertexSource + fragmentSource;
+      const usedMatrices: { [key: string]: string } = {};
 
-        regexMap(/\b(gl_[^;]*)\b;/g, header, function(groups) {
-            const name = groups[1];
-            if (source.indexOf(name) != -1) {
-                const capitalLetters = name.replace(/[a-z_]/g, '');
-                usedMatrices[capitalLetters] = LIGHTGL_PREFIX + name;
-            }
-        });
+      regexMap(/\b(gl_[^;]*)\b;/g, header, function(groups) {
+          const name = groups[1];
+          console.log(groups)
+          if (source.indexOf(name) !== -1) {
+              const capitalLetters = name.replace(/[a-z_]/g, '');
+              usedMatrices[capitalLetters] = LIGHTGL_PREFIX + name;
+          }
+      });
 
-        if (source.indexOf('ftransform') !== -1) usedMatrices['MVPM'] = LIGHTGL_PREFIX + 'gl_ModelViewProjectionMatrix';
-        this.usedMatrices = usedMatrices;
+      console.log(usedMatrices, 111234)
+
+      if (source.indexOf('ftransform') !== -1) usedMatrices['MVPM'] = LIGHTGL_PREFIX + 'gl_ModelViewProjectionMatrix';
+      this.usedMatrices = usedMatrices;
+
+      console.log(vertexSource)
+      vertexSource = fix(vertexHeader, vertexSource);
+      console.log(vertexSource)
+      console.log(fragmentSource)
+      fragmentSource = fix(fragmentHeader, fragmentSource);
+      console.log(fragmentSource)
 
 
-        vertexSource = fix(vertexHeader, vertexSource);
-        fragmentSource = fix(fragmentHeader, fragmentSource);
+      const program = this.context.createProgram();
 
+      if(!program){
+        throw new Error('program was not created ');
+      }
 
-        const program = this.context.createProgram();
+      this.program = program;
 
-        if(!program){
-          throw new Error('program was not created ');
-        }
+      const compiledVertex = this.compileSource(engine.glContext.VERTEX_SHADER, vertexSource);
 
-        this.program = program;
+      if(!compiledVertex){
+        throw new Error('could not compile vertex shader');
+      }
 
-        const compiledVertex = this.compileSource(35633 /*gl.VERTEX_SHADER*/, vertexSource);
+      const compiledFragment = this.compileSource(engine.glContext.FRAGMENT_SHADER, fragmentSource);
 
-        if(!compiledVertex){
-          throw new Error('could not compile vertex shader');
-        }
+      if(!compiledFragment){
+        throw new Error('could not compile fragment shader');
+      }
 
-        const compiledFragment = this.compileSource(35632 /*gl.FRAGMENT_SHADER*/, fragmentSource);
+      this.context.attachShader(this.program, compiledVertex);
+      this.context.attachShader(this.program, compiledFragment);
+      this.context.linkProgram(this.program);
 
-        if(!compiledFragment){
-          throw new Error('could not compile fragment shader');
-        }
+      if (!this.context.getProgramParameter(this.program, this.context.LINK_STATUS))   // :(
+      {
+          throw new Error('link error: ' + this.context.getProgramInfoLog(this.program));
+      }
 
-        this.context.attachShader(this.program, compiledVertex);
-        this.context.attachShader(this.program, compiledFragment);
-        this.context.linkProgram(this.program);
-        if (!this.context.getProgramParameter(this.program, this.context.LINK_STATUS))   // :(
-        {
-            throw new Error('link error: ' + this.context.getProgramInfoLog(this.program));
-        }
+      this.attributesLocation = {};
+      this.uniformLocations = {};
 
-        this.attributes = {};
-        this.uniformLocations = {};
+      this.setUniformSamplers(source)
 
-        // Sampler uniforms need to be uploaded using `gl.uniform1i()` instead of `gl.uniform1f()`.
-        // To do this automatically, we detect and remember all uniform samplers in the source code.
-        const isSampler: { [key: string]: number } = {};
-        regexMap(/uniform\s+sampler(1D|2D|3D|Cube)\s+(\w+)\s*;/g, vertexSource + fragmentSource, function(groups) {
-            isSampler[groups[2]] = 1;
-        });
-
-        this.isSampler = isSampler;
+      this.context.useProgram(this.program);
     }
 
     compileSource(type:number, source:string) {
@@ -226,95 +219,114 @@ class Shader {
         return shader;
       }
 
-    // ### .uniforms(uniforms)
-    //
-    // Set a uniform for each property of `uniforms`. The correct `gl.uniform*()` method is
-    // inferred from the value types and from the stored uniform sampler flags.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    uniforms(uniforms: { [x: string]: any }) 
-    {
+    /**
+     * Uniforms of type sampler need to be uploaded using `gl.uniform1i()` 
+     * instead of `gl.uniform1f()`. To do this automatically, we detect 
+     * and remember all uniform samplers in the source code
+     * @param source 
+     */
+    setUniformSamplers(source: string){
+      const uniformSamplers: { [key: string]: number } = {};
 
-      
-        this.context.useProgram(this.program);
+      regexMap(/uniform\s+sampler(1D|2D|3D|Cube)\s+(\w+)\s*;/g, source, function(groups) {
+        uniformSamplers[groups[2]] = 1;
+      });
 
-        for (const name in uniforms) 
-        {
-            const location = this.uniformLocations[name] || this.context.getUniformLocation(this.program, name);
-            if (!location) continue;
-            this.uniformLocations[name] = location;
-            let value = uniforms[name];
-            if (value instanceof Vector) 
-            {
-                value = [value.x, value.y, value.z];
-            }
-            else if (value instanceof Matrix) 
-            {
-                value = value.m;
-            }
-
-            if (isArray(value)) 
-            {
-                switch (value.length) 
-                {
-                    case 1: this.context.uniform1fv(location, new Float32Array(value)); break;
-                    case 2: this.context.uniform2fv(location, new Float32Array(value)); break;
-                    case 3: this.context.uniform3fv(location, new Float32Array(value)); break;
-                    case 4: this.context.uniform4fv(location, new Float32Array(value)); break;
-                    // Matrices are automatically transposed, since WebGL uses column-major
-                    // indices instead of row-major indices.
-                    case 9: this.context.uniformMatrix3fv(location, false, new Float32Array([
-                            value[0], value[3], value[6],
-                            value[1], value[4], value[7],
-                            value[2], value[5], value[8]
-                    ])); break;
-                    case 16: this.context.uniformMatrix4fv(location, false, new Float32Array([
-                            value[0], value[4], value[8], value[12],
-                            value[1], value[5], value[9], value[13],
-                            value[2], value[6], value[10], value[14],
-                            value[3], value[7], value[11], value[15]
-                    ])); break;
-                    default: throw new Error('don\'t know how to load uniform "' + name + '" of length ' + value.length);
-                }
-            }
-            else if (isNumber(value)) 
-            {
-                (this.isSampler[name] ? this.context.uniform1i : this.context.uniform1f).call(this.context, location, value);
-            }
-
-            // todo: remove these for the final build!
-            else 
-            {
-                throw new Error('attempted to set uniform "' + name + '" to invalid value ' + value);
-            }
-        }
-
-        return this;
+      this.uniformSamplers = uniformSamplers;
     }
 
-    // ### .draw(mesh[, mode])
-    //
-    // Sets all uniform matrix attributes, binds all relevant buffers, and draws the
-    // mesh geometry as indexed triangles or indexed lines. Set `mode` to `this.context.LINES`
-    // (and either add indices to `lines` or call `computeWireframe()`) to draw the
-    // mesh in wireframe.
+    /**
+     * Set a uniform for each property of `uniforms`. 
+     * The correct `gl.uniform*()` method is inferred from the value types 
+     * and from the stored uniform sampler flags.
+     * @param uniforms 
+     * @returns 
+     */
+    uniforms(uniforms: { [x: string]: any }) {
+      for (const name in uniforms) {
+
+        const location = this.uniformLocations[name] || 
+          this.context.getUniformLocation(this.program, name)
+
+        if (!location) continue
+
+        this.uniformLocations[name] = location
+
+        let value = uniforms[name]
+
+        if (value instanceof Vector) {
+            value = [value.x, value.y, value.z];
+        } else if (value instanceof Matrix) {
+            value = value.m;
+        }
+
+        if (isArray(value)) {
+          switch (value.length) {
+            case 1: this.context.uniform1fv(location, new Float32Array(value)); break;
+            case 2: this.context.uniform2fv(location, new Float32Array(value)); break;
+            case 3: this.context.uniform3fv(location, new Float32Array(value)); break;
+            case 4: this.context.uniform4fv(location, new Float32Array(value)); break;
+            // Matrices are automatically transposed, since WebGL uses column-major
+            // indices instead of row-major indices.
+            case 9: this.context.uniformMatrix3fv(location, false, new Float32Array([
+                    value[0], value[3], value[6],
+                    value[1], value[4], value[7],
+                    value[2], value[5], value[8]
+            ])); break;
+            case 16: this.context.uniformMatrix4fv(location, false, new Float32Array([
+                    value[0], value[4], value[8], value[12],
+                    value[1], value[5], value[9], value[13],
+                    value[2], value[6], value[10], value[14],
+                    value[3], value[7], value[11], value[15]
+            ])); break;
+            default: throw new Error('don\'t know how to load uniform "' + name + '" of length ' + value.length);
+          }
+        } else if (isNumber(value)) {
+          const uniform1 = this.uniformSamplers[name] ? this.context.uniform1i : this.context.uniform1f
+          uniform1.bind(this.context)(location, value);
+        } else {
+          throw new Error('attempted to set uniform "' + name + '" to invalid value ' + value);
+        }
+      }
+
+      return this;
+    }
+
+    /**
+     * Draw mesh geometry as indexed triangles or indexed lines
+     * Set `mode` to `this.context.LINES` and either add indices to `lines` or
+     * call `computeWireframe()`) to draw the mesh in wireframe
+     */
     draw(mesh:Mesh) {
         this.drawBuffers(
             mesh.vertexBuffers,
             mesh.indexBuffers['triangles'],
             this.context.TRIANGLES
-        )  // we probably could simplify this bit of code and remove the lines part...
+        )
     }
 
-
-    // ### .drawBuffers(vertexBuffers, indexBuffer, mode)
-    //
-    // Sets all uniform matrix attributes, binds all relevant buffers, and draws the
-    // indexed mesh geometry. The `vertexBuffers` argument is a map from attribute
-    // names to `Buffer` objects of type `this.context.ARRAY_BUFFER`, `indexBuffer` is a `Buffer`
-    // object of type `this.context.ELEMENT_ARRAY_BUFFER`, and `mode` is a WebGL primitive mode
-    // like `this.context.TRIANGLES` or `this.context.LINES`. This method automatically creates and caches
-    // vertex attribute pointers for attributes as needed.
-    drawBuffers(vertexBuffers:{[key:string] : Buffer<Float32Array>}, indexBuffer:Buffer<Uint16Array>, mode:number) {
+    /**
+     * Sets all uniform matrix attributes, binds all relevant buffers
+     * and draws the indexed mesh geometry
+     * 
+     * The `vertexBuffers` argument is a map from attribute 
+     * names to `Buffer` objects of type `this.context.ARRAY_BUFFER`
+     * 
+     * The `mode` is a WebGL primitive mode
+     * like `this.context.TRIANGLES` or `this.context.LINES`
+     * 
+     * This method automatically creates and caches vertex attribute pointers 
+     * for attributes as needed
+     * 
+     * @param vertexBuffers 
+     * @param indexBuffer 
+     * @param mode 
+     * @returns 
+     */
+    private drawBuffers(
+      vertexBuffers:{[key:string] : Buffer<Float32Array>}, 
+      indexBuffer:Buffer<Uint16Array>, 
+      mode:number) {
         // Only construct up the built-in matrices we need for this shader.
         // BRING THEM BACK IF WE NEED THEM !!!!
         const used = this.usedMatrices;
@@ -349,9 +361,9 @@ class Shader {
         for (const attribute in vertexBuffers) 
         {
             const buffer = vertexBuffers[attribute];
-            const location = this.attributes[attribute] || this.context.getAttribLocation(this.program, attribute.replace(/^(gl_.*)$/, LIGHTGL_PREFIX + '$1'));
+            const location = this.attributesLocation[attribute] || this.context.getAttribLocation(this.program, attribute.replace(/^(gl_.*)$/, LIGHTGL_PREFIX + '$1'));
             if (location == -1 || !buffer.buffer) continue;
-            this.attributes[attribute] = location;
+            this.attributesLocation[attribute] = location;
             this.context.bindBuffer(34962 /*this.context.ARRAY_BUFFER*/, buffer.buffer);
             this.context.enableVertexAttribArray(location);
             this.context.vertexAttribPointer(location, buffer.spacing, 5126 /*this.context.FLOAT*/, false, 0, 0);
@@ -359,11 +371,11 @@ class Shader {
         }
 
         // Disable unused attribute pointers.
-        for (const attribute in this.attributes) 
+        for (const attribute in this.attributesLocation) 
         {
             if (!(attribute in vertexBuffers)) 
             {
-                this.context.disableVertexAttribArray(this.attributes[attribute]);
+                this.context.disableVertexAttribArray(this.attributesLocation[attribute]);
             }
         }
 

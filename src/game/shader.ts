@@ -3,22 +3,27 @@ varying vec2 coord;
 varying vec4 pos;
 void main() {
     coord = gl_TexCoord.xy;
-    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;\
+    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
     pos = gl_Position;
 }
 `
 
 export const FragmentShader = `
+
+// uniforms
 uniform sampler2D texture;
 uniform float factor;
 uniform float over;
 uniform vec2 sky;
+
 varying vec2 coord;
 varying vec4 pos;
+
 float fogf(float d) {
     const float LOG2 = -1.442695;
     return 1.0 - clamp(exp2(d*d*LOG2), 0.0, 1.0);
 }
+
 void main() {
     vec4 os = texture2D(texture, coord);
     vec4 ms = texture2D(texture, coord + vec2(0.0, 0.25));
