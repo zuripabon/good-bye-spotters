@@ -73,10 +73,10 @@ class Mesh {
   
     constructor(gl: WebGLRenderingContext, options: MeshOptions = {}) {
     this.gl = gl;
-      this.addVertexBuffer('vertices', 'gl_Vertex');
-      if (options.coords) this.addVertexBuffer('coords', 'gl_TexCoord');
-      if (options.normals) this.addVertexBuffer('normals', 'gl_Normal');
-      if (options.colors) this.addVertexBuffer('colors', 'gl_Color');
+      this.addVertexBuffer('vertices', 'VertexPosition');
+      if (options.coords) this.addVertexBuffer('coords', 'TexCoord');
+      if (options.normals) this.addVertexBuffer('normals', 'Normal');
+      if (options.colors) this.addVertexBuffer('colors', 'Color');
       if (!('triangles' in options) || options.triangles) this.addIndexBuffer('triangles');
       if (options.lines) this.addIndexBuffer('lines');
     }
@@ -159,7 +159,6 @@ class Mesh {
         return m;
     }
 
-      // a box (lol)
   // this allows you to specify individual planes (or combinations of them) using the same row approach for texturing
   // we assume you define at least one of them lol
   static box(gl:WebGLRenderingContext, row:number, cfg:string){ //s, t, u, v, sx, sy) 

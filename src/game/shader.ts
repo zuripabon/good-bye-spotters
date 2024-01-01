@@ -1,11 +1,23 @@
+/**
+ * The engine automatically injects different uniforms and attributes:
+ * 
+ * - ModelViewProjectionMatrix = projectionMat * translationMat * rotationMat * scaleMat
+ * - VertexPosition
+ * 
+ * Now, considering the clipSpacePosition = projectionMat * translationMat * rotationMat * scaleMat * position
+ * 
+ * Applying the transforms would be `gl_Position = ModelViewProjectionMatrix * VertexPosition;`
+ * 
+ */
+
 export const VertexShader = `
 
 varying vec2 coord;
 varying vec4 pos;
 
 void main() {
-    coord = LIGHTGLgl_TexCoord.xy;
-    gl_Position = LIGHTGLgl_ModelViewProjectionMatrix * LIGHTGLgl_Vertex;
+    coord = TexCoord.xy;
+    gl_Position = ModelViewProjectionMatrix * VertexPosition;
     pos = gl_Position;
 }
 `

@@ -54,11 +54,11 @@ function regexMap(regex:RegExp, text:string, callback: (result:RegExpExecArray|s
 
 const vertexHeader = `
 // Start - This is automatically injected by engine
-uniform mat4 LIGHTGLgl_ModelViewProjectionMatrix;
-attribute vec4 LIGHTGLgl_Vertex;
-attribute vec4 LIGHTGLgl_TexCoord;
-attribute vec3 LIGHTGLgl_Normal;
-attribute vec4 LIGHTGLgl_Color;
+uniform mat4 ModelViewProjectionMatrix;
+attribute vec4 VertexPosition;
+attribute vec4 TexCoord;
+attribute vec3 Normal;
+attribute vec4 Color;
 // End - This is automatically injected by engine
 
 `;
@@ -66,15 +66,12 @@ attribute vec4 LIGHTGLgl_Color;
 const fragmentHeader = `
 // Start - This is automatically injected by engine
 precision highp float;
-uniform mat4 LIGHTGLgl_ModelViewProjectionMatrix;
+uniform mat4 ModelViewProjectionMatrix;
 // End - This is automatically injected by engine
 
 `;
 
-const builtInUniforms = ['gl_ModelViewProjectionMatrix']
-  // Non-standard names beginning with `gl_` must be mangled because they will
-// otherwise cause a compiler error.
-const LIGHTGL_PREFIX = 'LIGHTGL';
+const builtInUniforms = ['ModelViewProjectionMatrix']
 
 class Shader {
 
@@ -103,8 +100,7 @@ class Shader {
 
       builtInUniforms.map(builtInUniform => {
         if (source.indexOf(builtInUniform) !== -1) {
-          const capitalLetters = builtInUniform.replace(/[a-z_]/g, '');
-          usedMatrices[capitalLetters] = LIGHTGL_PREFIX + builtInUniform;
+          usedMatrices[builtInUniform] = builtInUniform;
         }
       })
 
@@ -270,33 +266,18 @@ class Shader {
       vertexBuffers:{[key:string] : Buffer<Float32Array>}, 
       indexBuffer:Buffer<Uint16Array>, 
       mode:number) {
+
         // Only construct up the built-in matrices we need for this shader.
-        // BRING THEM BACK IF WE NEED THEM !!!!
-        const used = this.usedMatrices;
-        const MVM = this.modelView.getModelviewMatrix();
-        const PM = this.modelView.getProjectionMatrix();
-//        var MVMI = (used.MVMI || used.NM) ? MVM.inverse() : null;
-//        var PMI = (used.PMI) ? PM.inverse() : null;
-//        var MVPM = (used.MVPM || used.MVPMI) ? PM.multiply(MVM) : null; // original
+        if(this.usedMatrices[builtInUniforms[0]]){
+          const MVM = this.modelView.getModelviewMatrix();
+          const PM = this.modelView.getProjectionMatrix();
 
-        const MVPM = used.MVPM ? PM.multiply(MVM) : null;
-        const matrices:{[key:string]:Matrix} = {};
-//        if (used.MVM) matrices[used.MVM] = MVM;
-//        if (used.MVMI) matrices[used.MVMI] = MVMI;
-//        if (used.PM) matrices[used.PM] = PM;
-//        if (used.PMI) matrices[used.PMI] = PMI;
-        if (used.MVPM && MVPM) matrices[used.MVPM] = MVPM;
-//        if (used.MVPMI) matrices[used.MVPMI] = MVPM.inverse();
-  
-/*      
-        if (used.NM) 
-        {
-            var m = MVMI.m;
-            matrices[used.NM] = [m[0], m[4], m[8], m[1], m[5], m[9], m[2], m[6], m[10]];
+          // clipSpacePosition = projectionMat * translationMat * rotationMat * scaleMat * position
+          // Matrix multiplication is assosiative: (a*b)*c=a*(b*c)
+          // We have here a=PM (projectionMat), b=MVM (translationMat * rotationMat * scaleMat)
+          // and c is the vertex position
+          this.uniforms({[builtInUniforms[0]]: PM.multiply(MVM)});
         }
-*/
-
-        this.uniforms(matrices);
 
         // Create and enable attribute pointers as necessary.
         let length = 0;
@@ -304,12 +285,12 @@ class Shader {
         for (const attribute in vertexBuffers) 
         {
             const buffer = vertexBuffers[attribute];
-            const location = this.attributesLocation[attribute] || this.context.getAttribLocation(this.program, attribute.replace(/^(gl_.*)$/, LIGHTGL_PREFIX + '$1'));
+            const location = this.attributesLocation[attribute] || this.context.getAttribLocation(this.program, attribute);
             if (location == -1 || !buffer.buffer) continue;
             this.attributesLocation[attribute] = location;
-            this.context.bindBuffer(34962 /*this.context.ARRAY_BUFFER*/, buffer.buffer);
+            this.context.bindBuffer(this.context.ARRAY_BUFFER, buffer.buffer);
             this.context.enableVertexAttribArray(location);
-            this.context.vertexAttribPointer(location, buffer.spacing, 5126 /*this.context.FLOAT*/, false, 0, 0);
+            this.context.vertexAttribPointer(location, buffer.spacing, this.context.FLOAT, false, 0, 0);
             length = buffer.length / buffer.spacing;
         }
 
@@ -327,8 +308,8 @@ class Shader {
         {
           if (indexBuffer) 
           {
-                this.context.bindBuffer(34963 /*this.context.ELEMENT_ARRAY_BUFFER*/, indexBuffer.buffer);
-                this.context.drawElements(mode, indexBuffer.length, 5123 /*this.context.UNSIGNED_SHORT*/, 0);
+                this.context.bindBuffer(this.context.ELEMENT_ARRAY_BUFFER, indexBuffer.buffer);
+                this.context.drawElements(mode, indexBuffer.length, this.context.UNSIGNED_SHORT, 0);
             }
             else 
             {

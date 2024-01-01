@@ -154,15 +154,15 @@ abstract class Engine {
     ) {
       this.modelView.pushMatrix();
       this.modelView.translate(position.x, position.y, position.z);
-      if(s !== 1.0){
-        this.modelView.scale(s, s, s);
-      }
       if(rotation.x){
         this.modelView.rotate(rotation.x, 1.0, 0.0, 0.0);
       }if(rotation.y){
         this.modelView.rotate(rotation.y, 0.0, 1.0, 0.0);
       }if(rotation.z){
         this.modelView.rotate(rotation.z, 0.0, 0.0, 1.0);
+      }
+      if(s !== 1.0){
+        this.modelView.scale(s, s, s);
       }
       const shaderUniforms = this.getShadersUniforms()
       this.shader.uniforms({...shaderUniforms, over: over || shaderUniforms.over, factor: factor || shaderUniforms.factor});
