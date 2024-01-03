@@ -1,5 +1,7 @@
 
 import {useState, useEffect } from 'react'
+import wasdPicture from '../assets/wasd.png'
+import mousePicture from '../assets/mouse.png'
 
 const SECONDS_TO_SHOW = 5
 
@@ -17,8 +19,8 @@ function Hint() {
 
   return ( 
     <section className="hint">
-      <img src="/wasd.png" width="100" height="60" />
-      <img src="/mouse.png" width="60" height="60"/>
+      <img src={wasdPicture} width="100" height="60" />
+      <img src={mousePicture} width="60" height="60"/>
     </section>
   )
 }
